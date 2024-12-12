@@ -98,4 +98,22 @@ var_res_mult <- var(mult$random, na.rm = TRUE)
 print(var_res_add)
 print(var_res_mult)
 ```
-Calculam la distància entre l'original i els dos models per veure quin es millor
+Pentura a nes grafic següent calculam distàncies entre original i cada model, i mos quedam amb es que minimitzi sa distància? (MSE com demana a s'exercici)
+
+```{r}
+model_add = add$trend + add$seasonal
+model_mult = mult$trend* mult$seasonal
+
+ts_add = ts(model_add, frequency = 4)
+ts_mult = ts(model_mult, frequency=4)
+
+plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
+axis(1, at = x, labels = x)
+
+lines(ts_add, col = "red")
+lines(ts_mult, col = "blue")
+
+legend("topleft", legend = c("original", "model additiu", "model multiplicatiu"), col = c("black","blue", "red"), lty = 1)
+
+```
+
