@@ -13,4 +13,89 @@ author: "Miquel Àngel Aguiló, Joan Camps, Gerard Ribas"
 lang: "ca"
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(readr)
+library(janitor)
+library(viridis)
+library(ggcorrplot)
+```
 
+Enllaç [git](https://github.com/JoanCT/Practica7_AD).
+
+### Introducció
+
+### Anàlisi exploratòria
+
+```{r}
+raw_data<-read.csv("ts.csv",
+                   header=FALSE, sep=" ")
+ts_raw = ts(raw_data, frequency = 4)
+
+#Seleccionam el 80% de les files
+n = nrow(raw_data)
+ts = ts(raw_data[1:floor(0.8*n), ], frequency = 4)
+
+x=1:11
+plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
+axis(1, at = x, labels = x)
+
+```
+```{r}
+add = decompose(ts, type = "additive")
+plot(add)
+```
+```{r}
+mult = decompose(ts, type = "multiplicative")
+plot(mult)
+```
+
+
+Comentar idees:
+
+se veu tendència creixent, variabilitat ns si podem dir res, a lo darrer pareix que creix variabilitat, però es ver que a s'any 6 hi ha canvis més grossos que a nes 8. (Mirant es random a nes dos gràfics darrers, pareix q variabilitat és homocedàstica)
+
+Estacionalitat: se veu clarament com funciona un any: cada any hi ha 3 pics corresponents inici, meitat de l'any i final. Entre els pics s'arriba a un minim local. Corresponen a inici any (cap d'any i rebaixes), un altre a inici estiu, un a final d'any (nadal)
+
+Cicles pareix que no n'hi ha.
+
+Pensar: hem de fer tendències i estacionalitat manual, o deu bastar amb aquesta funció? Grafics de descomposicions els posam en propera secció i aquí només la ts original?
+
+```{r}
+#Pentura se pot llevar, era per provar aquest mètode més precís
+#plot(stl(ts,s.window="periodic"))
+```
+
+## ACF
+
+```{r}
+acf(ts)
+pacf(ts)
+```
+
+Comentar: Per ACF veim que clarament hi ha estacionalitat. Per PACF, veim que una observació té importància sobre dos trimestres posteriors (mig any)
+
+```{r}
+#Ho miram havent llevat tendència,, i igualment se veu el patró
+log_ts = ts(log(raw_data[1:floor(0.8*n), ]), frequency=4)
+plot.ts(diff(log_ts))
+acf(diff(log_ts))
+pacf(diff(log_ts))
+```
+
+Miram si millor model multiplicatiu o additiu
+```{r}
+plot(density(na.omit(add$random)), main = "Densitat residus Add", xlab = "residus Add", ylab = "Densitat")
+plot(density(na.omit(mult$random)), main = "Densitat residus Mult", xlab = "residus Mult", ylab = "Densitat")
+
+```
+(aixi com està no se si se poden comparar, no tenen mateixa escala)
+```{r}
+var_res_add <- var(add$random, na.rm = TRUE)
+var_res_mult <- var(mult$random, na.rm = TRUE)
+
+print(var_res_add)
+print(var_res_mult)
+```
+Calculam la distància entre l'original i els dos models per veure quin es millor
