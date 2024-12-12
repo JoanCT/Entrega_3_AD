@@ -1,0 +1,16 @@
+---
+title: "Pràctica 7 --- Problema 6"
+subtitle: "Anàlisi de Dades 2024-25"
+date: today
+format:
+  html:
+    theme: lumen
+    toc: true
+    toc-depth: 3
+    embed-resources: true
+editor: visual
+author: "Miquel Àngel Aguiló, Joan Camps, Gerard Ribas"
+lang: "ca"
+---
+
+
