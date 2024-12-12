@@ -13,9 +13,44 @@ author: "Miquel Àngel Aguiló, Joan Camps, Gerard Ribas"
 lang: "ca"
 ---
 
+```{css, echo = FALSE}
+/* Estil de sortida per HTML/CSS */
+/* Per posar notes pròpies */
+todo {color: magenta}
+gra {color: rgb(237, 65, 65)}
+jct {color: #6666ff}
+maa {color: #66bb66}
+note {color: orange}
+comment {display: none}
+gra::before {
+   content: "[G: ";
+   font-weight: bold;
+}
+jct::before {
+   content: "[J: ";
+   font-weight: bold;
+}
+maa::before {
+   content: "[M: ";
+   font-weight: bold;
+}
+note::before {
+   content: "[NOTA: ";
+   font-weight: bold;
+}
+todo::before {
+   content: "[TODO: ";
+   font-weight: bold;
+}
+gra::after, jct::after, note::after, todo::after, maa:after {
+   content: "]";
+}
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, warning = FALSE, message = FALSE)
 library(tidyverse)
+library(ggplot2)
 library(readr)
 library(janitor)
 library(viridis)
@@ -24,9 +59,19 @@ library(ggcorrplot)
 
 Enllaç [git](https://github.com/JoanCT/Practica7_AD).
 
-### Introducció
+## Enunciat
+La sèrie temporal [ts_1](https://github.com/igmuib/Practica_AD/blob/main/ts_1.csv) correspon a les vendes (en milers d'unitats) d'un producte en una empresa durant diversos trimestres consecutius. L'empresa cerca desenvolupar un model de pronòstic per predir les vendes futures del producte. Per això, dividiu la sèrie temporal en dos trossos: un 80% de les primeres observacions les utilitzareu per “aprendre” i deixareu el 20% restant per avaluar la capacitat predictiva del model.
 
-### Anàlisi exploratòria
+**(6.1)** Descriviu la sèrie temporal d'aprenentatge: gràfic de la sèrie original,
+detecció de la tendència, anàlisi de la variabilitat i estacionalitat (en el cas que apliqui).
+
+**(6.2)** Analitzau els gràfics ACF i PACF. Descomposau la sèrie d'acord amb un model additiu i un de multiplicatiu, seleccioneu el millor. Finalment, feis prediccions amb el model additiu o multiplicatiu que heu seleccionat, dibuixau els vostres pronòstics sobre la sèrie total (aprenentatge + test). Calculau l'error quadràtic mitjà de les prediccions i comentau el resultat en el context del problema.
+
+
+
+## Introducció
+
+## Anàlisi exploratòria
 
 ```{r}
 raw_data<-read.csv("ts.csv",
@@ -35,7 +80,9 @@ ts_raw = ts(raw_data, frequency = 4)
 
 #Seleccionam el 80% de les files
 n = nrow(raw_data)
-ts = ts(raw_data[1:floor(0.8*n), ], frequency = 4)
+n_data = floor(0.8*n)
+data = raw_data[1:n_data,]
+ts = ts(data, frequency = 4)
 
 x=1:11
 plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
@@ -51,8 +98,20 @@ mult = decompose(ts, type = "multiplicative")
 plot(mult)
 ```
 
+<gra>Afegesc aquest gràfic. Se veu que hi ha relació cada 2 trimestres, al igual que altres gràfics; encara que les caixes se solapen però hi ha una de les línies que no</gra>
+```{r}
+mes2 <- factor(1:n_data %% 4, levels = 0:4)
+ggplot(data.frame(mes2, data), aes(x = mes2, y = data)) +
+  xlab("Mes") + 
+  ylab("Gasto mensual por persona en €")+
+  geom_boxplot() +
+  theme(axis.text.x=element_text(angle=90,hjust=1)) 
 
-Comentar idees:
+
+```
+
+
+<todo>Comentar idees:</todo>
 
 se veu tendència creixent, variabilitat ns si podem dir res, a lo darrer pareix que creix variabilitat, però es ver que a s'any 6 hi ha canvis més grossos que a nes 8. (Mirant es random a nes dos gràfics darrers, pareix q variabilitat és homocedàstica)
 
@@ -61,6 +120,8 @@ Estacionalitat: se veu clarament com funciona un any: cada any hi ha 3 pics corr
 Cicles pareix que no n'hi ha.
 
 Pensar: hem de fer tendències i estacionalitat manual, o deu bastar amb aquesta funció? Grafics de descomposicions els posam en propera secció i aquí només la ts original?
+
+<gra>Pentura es prox dia li podem demanar com ho vol, però amb sa funció de R ja mos fa millor lo de sa tendència i tal</gra>
 
 ```{r}
 #Pentura se pot llevar, era per provar aquest mètode més precís
@@ -77,8 +138,8 @@ pacf(ts)
 Comentar: Per ACF veim que clarament hi ha estacionalitat. Per PACF, veim que una observació té importància sobre dos trimestres posteriors (mig any)
 
 ```{r}
-#Ho miram havent llevat tendència,, i igualment se veu el patró
-log_ts = ts(log(raw_data[1:floor(0.8*n), ]), frequency=4)
+#Ho miram havent llevat tendència, i igualment se veu el patró
+log_ts = ts(log(data), frequency=4)
 plot.ts(diff(log_ts))
 acf(diff(log_ts))
 pacf(diff(log_ts))
@@ -99,6 +160,8 @@ print(var_res_add)
 print(var_res_mult)
 ```
 Pentura a nes grafic següent calculam distàncies entre original i cada model, i mos quedam amb es que minimitzi sa distància? (MSE com demana a s'exercici)
+
+<gra>Sí, i també podem aplicar es dos models per fer ses prediccions i, com les tenim, veure quin s'ajusta més</gra>
 
 ```{r}
 model_add = add$trend + add$seasonal
