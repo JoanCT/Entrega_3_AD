@@ -68,27 +68,60 @@ detecció de la tendència, anàlisi de la variabilitat i estacionalitat (en el 
 **(6.2)** Analitzau els gràfics ACF i PACF. Descomposau la sèrie d'acord amb un model additiu i un de multiplicatiu, seleccioneu el millor. Finalment, feis prediccions amb el model additiu o multiplicatiu que heu seleccionat, dibuixau els vostres pronòstics sobre la sèrie total (aprenentatge + test). Calculau l'error quadràtic mitjà de les prediccions i comentau el resultat en el context del problema.
 
 
+<gra>Ara pensava, ses dades s'organitzen per períodes de 4 trimestres i ses dades completes en tenen 48 (surt exacte), però quan feim es 80% no queden múltiples de 4. no sé si hauríem d'aproximar-ho perquè es múltiples siguin exactes</gra>
+
+<gra>Per exemple, a `?decompose` diu `This only works well if ‘x’ covers an integer number of complete`</gra>
 
 ## Introducció
 
 ## Anàlisi exploratòria
+En primer lloc, notem que tenim 48 dades, és a dir, 12 períodes complets de quatre trimestres. Emperò, el 80% de 48 dona aproximadament 38, que no és múltiple del període. Aleshores, per facilitar l'anàlisi agafarem les primers 36 mostres (el 75%, que correspon a 9 períodes) d'aprenentatge, i deixarem les 12 restants (3 períodes) per les prediccions.
+
+Una vegada agafat el nombre de mostres, dibuixem la sèrie temporal de dades (el primer 80%) per tenir una primera visió de les dades. Com que no tenim cap informació del començament de la sèrie, enumerarem la sèrie començant pel període 1, on cada període té una durada d'un any (quatre trimestres), tot i que no té perquè començar en gener ja que no tenim informació al respecte.
 
 ```{r}
-raw_data<-read.csv("ts.csv",
+# totes les dades
+raw_data <- read.csv("ts.csv",
                    header=FALSE, sep=" ")
-ts_raw = ts(raw_data, frequency = 4)
+ts_raw <- ts(raw_data, frequency = 4)
+n <- nrow(raw_data)
 
-#Seleccionam el 80% de les files
-n = nrow(raw_data)
-n_data = floor(0.8*n)
-data = raw_data[1:n_data,]
-ts = ts(data, frequency = 4)
+# seleccionam el 80% (mòdul 4) de les files
+n_data <- floor(0.8*n)
+n_data <- n_data - (n_data %% 4)
+data <- raw_data[1:n_data,]
+ts <- ts(data, frequency = 4)
 
+# dibuixam les dades en un gràfic
 x=1:11
 plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
+lines(c(1,60), c(10,160), type='l')
 axis(1, at = x, labels = x)
-
 ```
+
+A simple vista es pot apreciar un comportament oscil·lant i, per tant, presenta estacionalitat, idò oscil·la amb els canvis d'estació, encara que no podem saber si hi ha més vendes en hivern i estiu o a primavera i tardor, idò no tenim informació sobre el començament de la sèrie. En el context del problema, es podria tractar de venda de roba d'entretemps, per exemple, ja que es vendria més en tardor i primavera.
+
+A més, presenta una tendència clarament positiva (començam al voltant dels 60 milers i acabam al voltant del 120 milers). També s'aprecia una variabilitat més o manco constant, tot i que hi ha alguns períodes (6-7 o 9-10) amb pics més grans. Finalment, no s'aprecia cap fluctuació cíclica, la sèrie pareix bastant constant, tenint en compte l'estacionalitat i la tendència.
+
+També podem estudiar l'estacionalitat amb un boxplot per cadascun dels trimestres.
+```{r}
+mes2 <- factor(1:n_data %% 4 + 1, levels = 1:4)
+ggplot(data.frame(mes2, data), aes(x = mes2, y = data)) +
+  xlab("Trimestre") + 
+  ylab("Vendes en milers")+
+  geom_boxplot() +
+  theme(axis.text.x=element_text(angle=90,hjust=1)) 
+```
+
+<gra>Què comentam d'aquí? Se veu que oscil·la però uf se solapen, hauríem de fer una ANOVA o algo?</gra>
+
+
+<gra>Ara se pot estudiar s'estacionalitat i sa variabilitat com fa ella amb sa recta de regressió i calculant es coeficients, però no sé si fa falta</gra>
+
+<gra>És que sa descomposició de sa sèrie de R ja és quan assumim es model additiu i es multiplicatiu, que és sa segona part</gra>
+
+## Models additiu i multiplicatiu
+
 ```{r}
 add = decompose(ts, type = "additive")
 plot(add)
@@ -96,18 +129,6 @@ plot(add)
 ```{r}
 mult = decompose(ts, type = "multiplicative")
 plot(mult)
-```
-
-<gra>Afegesc aquest gràfic. Se veu que hi ha relació cada 2 trimestres, al igual que altres gràfics; encara que les caixes se solapen però hi ha una de les línies que no</gra>
-```{r}
-mes2 <- factor(1:n_data %% 4, levels = 0:4)
-ggplot(data.frame(mes2, data), aes(x = mes2, y = data)) +
-  xlab("Mes") + 
-  ylab("Gasto mensual por persona en €")+
-  geom_boxplot() +
-  theme(axis.text.x=element_text(angle=90,hjust=1)) 
-
-
 ```
 
 
