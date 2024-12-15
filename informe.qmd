@@ -192,7 +192,27 @@ pacf(ts)
 
 En el primer gràfic (ACF) es pot observar una clara estacionalitat, idò s'aprecia un comportament oscil·lant i repetitiu. A més, les correlacions decreixen poc a poc degut a la tendència. Pel que fa al PACF, es pot veure que una observació influeix significativament a dos trimestres més endavant (també influeix al següent però de manera no tan significativa).
 
+<jct>Això ho hauríem de fer en cas que necessitàssim una sèrie estacionària per aplicar certes tècniques d'anàlisi (crec que no és el cas). Demà li demanam a n'irene i depenent de si fa falta o no ja ho borram / detallam més </jct>
 
+<gra>Per ses diferències, pensava pentura té mes sentit fer sa diferencia $y_t - y_{t-2}$, ja que estan més correlacionades</gra>
+
+
+```{r}
+# Ho miram havent llevat tendència, i igualment se veu el patró
+log_ts = ts(log(data), frequency=4)
+plot.ts(diff(log_ts))
+acf(diff(log_ts))
+pacf(diff(log_ts))
+```
+
+<jct>Dues diff:</jct>
+```{r}
+# Ho miram havent llevat tendència, i igualment se veu el patró
+log_ts = ts(log(data), frequency=4)
+plot.ts(diff(diff(log_ts)))
+acf(diff(diff(log_ts)))
+pacf(diff(diff(log_ts)))
+```
 
 ## Models additiu i multiplicatiu
 Hem vist a l'anàlisi exploratòria que la variabilitat no creix amb el temps. Per tant, esperam que un model additiu s'ajusti més que un de multiplicatiu.
@@ -214,16 +234,6 @@ De la mateixa manera es veu una tendència creixent, estacionalitat i, comparant
 
 <gra>Jo diria que és millor s'additiu pq s'estacionalitat no decreix ni creix, però li podem demanar mem com ho feim per determinar quin és millor, an es apunts no he trobat res. Pentura es millor és simplement fent EQM (Error Quadràtic Mitjà) de com s'ajusta es model a ses dades i triar es millor. O bé mirant es ACF/PACF i veure quins estan més a ses línies blaves, però be crec que dona parescut i no se distingeix molt</gra>
 
-<gra>Per ses diferències, pensava pentura té mes sentit fer sa diferencia $y_t - y_{t-2}$, ja que estan més correlacionades</gra>
-
-
-```{r}
-# Ho miram havent llevat tendència, i igualment se veu el patró
-log_ts = ts(log(data), frequency=4)
-plot.ts(diff(log_ts))
-acf(diff(log_ts))
-pacf(diff(log_ts))
-```
 
 Miram si millor model multiplicatiu o additiu
 ```{r}
@@ -273,5 +283,6 @@ mean(na.omit((model_mult - data))^2)
 
 ## Pronòstic
 <gra>An es apunts diu això per predir: "La predicción de la serie se realiza sumando las estimaciones de la tendencia y el factor estacional que corresponde a cada observación." Però clar, a s'additiu per exemple tenim $y_t = \mu_t + S_t + a_t$ on tot depen de $t$, però ara per fer es pronostics no tenim ni $\mu_t$ ni $S_t$. Pentura s'ha d'estimar sa tendència com una recta de regressió i sa $S_t$ sa mateixa per tots es períodes depenent de s'estació</gra>
+<jct>Tendria sentit que fos això darrer que comentes. Demà li demanam si només se referia a això o a models més elaborats (però q ns on emplearien es models additius / multiplcatius) </jct>
 
 
