@@ -55,22 +55,23 @@ library(readr)
 library(janitor)
 library(viridis)
 library(ggcorrplot)
+library(moments)
+
 ```
 
 Enllaç [git](https://github.com/JoanCT/Practica7_AD).
 
-<gra>He estructurat un poc es _headings_ des document</gra>
+<gra>He estructurat un poc es *headings* des document</gra>
 
 <todo>Hem de fer es README</todo>
 
 ## Enunciat
+
 La sèrie temporal [ts_1](https://github.com/igmuib/Practica_AD/blob/main/ts_1.csv) correspon a les vendes (en milers d'unitats) d'un producte en una empresa durant diversos trimestres consecutius. L'empresa cerca desenvolupar un model de pronòstic per predir les vendes futures del producte. Per això, dividiu la sèrie temporal en dos trossos: un 80% de les primeres observacions les utilitzareu per “aprendre” i deixareu el 20% restant per avaluar la capacitat predictiva del model.
 
-**(6.1)** Descriviu la sèrie temporal d'aprenentatge: gràfic de la sèrie original,
-detecció de la tendència, anàlisi de la variabilitat i estacionalitat (en el cas que apliqui).
+**(6.1)** Descriviu la sèrie temporal d'aprenentatge: gràfic de la sèrie original, detecció de la tendència, anàlisi de la variabilitat i estacionalitat (en el cas que apliqui).
 
 **(6.2)** Analitzau els gràfics ACF i PACF. Descomposau la sèrie d'acord amb un model additiu i un de multiplicatiu, seleccioneu el millor. Finalment, feis prediccions amb el model additiu o multiplicatiu que heu seleccionat, dibuixau els vostres pronòstics sobre la sèrie total (aprenentatge + test). Calculau l'error quadràtic mitjà de les prediccions i comentau el resultat en el context del problema.
-
 
 <gra>Ara pensava, ses dades s'organitzen per períodes de 4 trimestres i ses dades completes en tenen 48 (surt exacte), però quan feim es 80% no queden múltiples de 4. no sé si hauríem d'aproximar-ho perquè es múltiples siguin exactes</gra>
 
@@ -78,11 +79,10 @@ detecció de la tendència, anàlisi de la variabilitat i estacionalitat (en el 
 
 ## Introducció
 
-<jct> Desciben el contexto del problema
-; Desciben cada una de las vaiables que confoman la base de datos del estudio
- ; Han explicado adecuadamente la metodología estadística que se utiliza en el estudio </jct>
+<jct> Desciben el contexto del problema ; Desciben cada una de las vaiables que confoman la base de datos del estudio ; Han explicado adecuadamente la metodología estadística que se utiliza en el estudio </jct>
 
 ## Anàlisi exploratòria
+
 En primer lloc, notem que tenim 48 dades, és a dir, 12 períodes complets de quatre trimestres. Emperò, el 80% de 48 dona aproximadament 38, que no és múltiple del període. Aleshores, per facilitar l'anàlisi agafarem les primeres 36 mostres (el 75%, que correspon a 9 períodes) d'aprenentatge, i deixarem les 12 restants (3 períodes) per les prediccions.
 
 Una vegada agafat el nombre de mostres, dibuixem la sèrie temporal de dades (el primer 75%) per tenir una primera visió de les dades. Com que no tenim cap informació del començament de la sèrie, enumerarem la sèrie començant pel període 1, on cada període té una durada d'un any (quatre trimestres), tot i que no té perquè començar al gener ja que no tenim informació al respecte.
@@ -111,9 +111,7 @@ A simple vista es pot apreciar un comportament oscil·lant i, per tant <jct>jo n
 
 <jct>Jo posaria dos exemples d'interpretació depenent de si comença a trimestre 1/3 o 2/4. Si tenim 4 trimestres, son 1: gener-març, 2: abril-juny, 3:juliol-setembre, 4:octubre-desembre. Primavera i tardor corresponen a trimestres 2 i 4, tendria sentit si començas amb un d'aquests. Si començàs a trimestre 1 o 3, podríem dir que es pics se corresponen amb ses temporades de rebaixes (que són al gener i al juliol. i per tant pics a trimestres 1 i 3)</jct>
 
-<jct>Ho reescriuria com</jct>
-A simple vista es pot apreciar un comportament oscil·lant i amb presència d'estacionalitat, ja que les oscil·lacions presenten un patró determinat corresponent a les estacions. Ara bé, no podem saber si hi ha més vendes a l'hivern i estiu o a la primavera i tardor, idò no tenim informació sobre el començament de la sèrie. 
-En el cas que la sèrie començàs pel primer (o tercer) trimestre de l'any, podria tractar-se d'una tenda de roba genèrica, i les vendes es concentraríen en els trimestres 1 i 3 de l'any, per mor de les rebaixes del gener i del juliol. Altrament, si la sèrie començàs al segon (o quart) semestre de l'any, es podria tractar de venda de roba d'entretemps, ja que es vendria més a la tardor i primavera.
+<jct>Ho reescriuria com</jct> A simple vista es pot apreciar un comportament oscil·lant i amb presència d'estacionalitat, ja que les oscil·lacions presenten un patró determinat corresponent a les estacions. Ara bé, no podem saber si hi ha més vendes a l'hivern i estiu o a la primavera i tardor, idò no tenim informació sobre el començament de la sèrie. En el cas que la sèrie començàs pel primer (o tercer) trimestre de l'any, podria tractar-se d'una tenda de roba genèrica, i les vendes es concentraríen en els trimestres 1 i 3 de l'any, per mor de les rebaixes del gener i del juliol. Altrament, si la sèrie començàs al segon (o quart) semestre de l'any, es podria tractar de venda de roba d'entretemps, ja que es vendria més a la tardor i primavera.
 
 ```{r}
 tendencia=lm(data ~ time(ts))
@@ -136,11 +134,10 @@ axis(1, at = x, labels = x)
 
 ```
 
-
 A més, presenta una tendència clarament positiva (començam al voltant dels 60 milers i acabam al voltant del 120 milers). També s'aprecia una variabilitat més o manco constant, tot i que hi ha alguns períodes (6-7 o 9-10) amb pics més grans. Finalment, no s'aprecia cap fluctuació cíclica, la sèrie pareix bastant constant, tenint en compte l'estacionalitat i la tendència.
 
-També podem estudiar l'estacionalitat amb un boxplot per cadascun dels trimestres.
-<jct>Pq al boxplot comences a comptar pel 2 en lloc de l'1 ? Pq tengui sentit amb es gràfic ts, han de sortir 1 i 3 alts, en lloc de 2 i 4, no?</jct>
+També podem estudiar l'estacionalitat amb un boxplot per cadascun dels trimestres. <jct>Pq al boxplot comences a comptar pel 2 en lloc de l'1 ? Pq tengui sentit amb es gràfic ts, han de sortir 1 i 3 alts, en lloc de 2 i 4, no?</jct>
+
 ```{r}
 mes2 <- factor(1:n_data %% 4 + 1, levels = 1:4)
 df_aux = data.frame(mes2, data)
@@ -151,8 +148,7 @@ ggplot(df_aux, aes(x = mes2, y = data)) +
   theme(axis.text.x=element_text(angle=90,hjust=1)) 
 ```
 
-<gra>Què comentam d'aquí? Se veu que oscil·la però uf se solapen, hauríem de fer una ANOVA o algo?</gra>
-<jct>Provant de començar a comptar per 1</jct>
+<gra>Què comentam d'aquí? Se veu que oscil·la però uf se solapen, hauríem de fer una ANOVA o algo?</gra> <jct>Provant de començar a comptar per 1</jct>
 
 ```{r}
 mes2 <- factor((1:n_data %% 4), levels = 0:3)
@@ -178,13 +174,14 @@ pairwise.t.test(df_aux$data, df_aux$mes2, paired=TRUE)
 
 Amb un test d'anova i de comparació de mitjanes veim que hi ha diferències significatives entre les mitjanes del 3r al 4t i 2n semestre, i p-valors propers a 0.1 entre el 1r al 2n i 4t semestre. Així, podem corroborar que es dona l'estacionalitat esmentada.
 
-
 <gra>Ara se pot estudiar s'estacionalitat i sa variabilitat com fa ella amb sa recta de regressió i calculant es coeficients, però no sé si fa falta</gra>
 
 <gra>És que sa descomposició de sa sèrie de R ja és quan assumim es model additiu i es multiplicatiu, que és sa segona part</gra>
 
 ### ACF i PACF
+
 Vegem els gràfics ACF i PACF.
+
 ```{r}
 acf(ts)
 pacf(ts)
@@ -196,7 +193,6 @@ En el primer gràfic (ACF) es pot observar una clara estacionalitat, idò s'apre
 
 <gra>Per ses diferències, pensava pentura té mes sentit fer sa diferencia $y_t - y_{t-2}$, ja que estan més correlacionades</gra>
 
-
 ```{r}
 # Ho miram havent llevat tendència, i igualment se veu el patró
 log_ts = ts(log(data), frequency=4)
@@ -206,6 +202,7 @@ pacf(diff(log_ts))
 ```
 
 <jct>Dues diff:</jct>
+
 ```{r}
 # Ho miram havent llevat tendència, i igualment se veu el patró
 log_ts = ts(log(data), frequency=4)
@@ -215,9 +212,11 @@ pacf(diff(diff(log_ts)))
 ```
 
 ## Models additiu i multiplicatiu
+
 Hem vist a l'anàlisi exploratòria que la variabilitat no creix amb el temps. Per tant, esperam que un model additiu s'ajusti més que un de multiplicatiu.
 
 El model additiu és el següent.
+
 ```{r}
 add = decompose(ts, type = "additive")
 plot(add)
@@ -234,15 +233,16 @@ De la mateixa manera es veu una tendència creixent, estacionalitat i, comparant
 
 <gra>Jo diria que és millor s'additiu pq s'estacionalitat no decreix ni creix, però li podem demanar mem com ho feim per determinar quin és millor, an es apunts no he trobat res. Pentura es millor és simplement fent EQM (Error Quadràtic Mitjà) de com s'ajusta es model a ses dades i triar es millor. O bé mirant es ACF/PACF i veure quins estan més a ses línies blaves, però be crec que dona parescut i no se distingeix molt</gra>
 
-
 Miram si millor model multiplicatiu o additiu
+
 ```{r}
 plot(density(na.omit(add$random)), main = "Densitat residus Add", xlab = "residus Add", ylab = "Densitat")
 plot(density(na.omit(mult$random)), main = "Densitat residus Mult", xlab = "residus Mult", ylab = "Densitat")
 
 ```
-(aixi com està no se si se poden comparar, no tenen mateixa escala)
-<gra>Jo no ho compararia així, efectivament no està a sa mateixa escala i és normal que doni menos variabilitat es multiplicatiu</gra>
+
+(aixi com està no se si se poden comparar, no tenen mateixa escala) <gra>Jo no ho compararia així, efectivament no està a sa mateixa escala i és normal que doni menos variabilitat es multiplicatiu</gra>
+
 ```{r}
 var_res_add <- var(add$random, na.rm = TRUE)
 var_res_mult <- var(mult$random, na.rm = TRUE)
@@ -250,6 +250,7 @@ var_res_mult <- var(mult$random, na.rm = TRUE)
 print(var_res_add)
 print(var_res_mult)
 ```
+
 Pentura a nes grafic següent calculam distàncies entre original i cada model, i mos quedam amb es que minimitzi sa distància? (MSE com demana a s'exercici)
 
 <gra>Sí, i també podem aplicar es dos models per fer ses prediccions i, com les tenim, veure quin s'ajusta més</gra>
@@ -280,9 +281,56 @@ mean(na.omit((model_mult - data))^2)
 
 <gra>Mirant això (que per jo és lo més intuïtiu per comparar una o s'altre) veim que es model multiplicatiu s'ajusta millor que l'additiu, encara que són tan parescuts que realment podríem agafar qualsevol</gra>
 
+Mirem quins dels residuals de les sèries anteriors segueix una distribució normal, ja que si els errors segueixen normalitat (*White noise*), llavors ens indica que el model està ben ajustat. Fem la prova d'Agostino per ambdós models:
+
+```{r}
+residuales_add <- na.omit(add$random)
+residuales_mult <- na.omit(mult$random)
+
+# Prova d'Agostino pel model aditiu
+agostino_add <- agostino.test(residuales_add)
+
+# Prova d'Agostino pel model multiplicatiu
+agostino_mult <- agostino.test(residuales_mult)
+
+# Resultats
+cat("Prueba de Agostino para Modelo Aditivo:\n")
+print(agostino_add)
+
+cat("\nPrueba de Agostino para Modelo Multiplicativo:\n")
+print(agostino_mult)
+
+```
+
+Com podem comprovar, cap dels models té uns residuals que segueixin una distribució normal, així, concloem dient que els models no són bons.
 
 ## Pronòstic
-<gra>An es apunts diu això per predir: "La predicción de la serie se realiza sumando las estimaciones de la tendencia y el factor estacional que corresponde a cada observación." Però clar, a s'additiu per exemple tenim $y_t = \mu_t + S_t + a_t$ on tot depen de $t$, però ara per fer es pronostics no tenim ni $\mu_t$ ni $S_t$. Pentura s'ha d'estimar sa tendència com una recta de regressió i sa $S_t$ sa mateixa per tots es períodes depenent de s'estació</gra>
-<jct>Tendria sentit que fos això darrer que comentes. Demà li demanam si només se referia a això o a models més elaborats (però q ns on emplearien es models additius / multiplcatius) </jct>
+
+<gra>An es apunts diu això per predir: "La predicción de la serie se realiza sumando las estimaciones de la tendencia y el factor estacional que corresponde a cada observación." Però clar, a s'additiu per exemple tenim $y_t = \mu_t + S_t + a_t$ on tot depen de $t$, però ara per fer es pronostics no tenim ni $\mu_t$ ni $S_t$. Pentura s'ha d'estimar sa tendència com una recta de regressió i sa $S_t$ sa mateixa per tots es períodes depenent de s'estació</gra> <jct>Tendria sentit que fos això darrer que comentes. Demà li demanam si només se referia a això o a models més elaborats (però q ns on emplearien es models additius / multiplcatius) </jct>
+
+Anem a intentar preveure, a partir del model additatiu, la sèrie temporal pels 12 termes restants. Per això, el que farem sirà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regresió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem sirà repetir els 4 últims valors d'estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc sirà l'error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l'estimació:
+
+```{r}
+# Crear el vector original de 48 elements
+vector <- seq(from = 1, by = 0.25, length.out = 48)
+n <- 36 
+
+time_extended <- c(vector, (n+1):(n+12))
+
+new_data <- data.frame(time.ts = time_extended)
 
 
+tend <- predict(tendencia, newdata = new_data)  
+tendencia_futura <- tend[(n+1):(n+12)]  
+
+# Estacionalidat
+estacionalitat <- add$seasonal
+estacionalitat_futura <- rep(estacionalitat[1:4], 3)  
+
+# Calcular la previsión sumando tendencia y estacionalidad futura
+previsio <- tendencia_futura + estacionalitat_futura
+
+estacionalitat_futura
+tendencia_futura
+
+```
