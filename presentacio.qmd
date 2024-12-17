@@ -21,12 +21,19 @@ library(readr)
 library(janitor)
 library(viridis)
 library(ggcorrplot)
-library(moments)
 ```
 
+## Continguts
+- Enunciat
+- Introducció <todo></todo>
+- Anàlisi exploratòria
+- Models additiu i multiplicatiu <todo>Mirau ses notes que he posat</todo>
+- Prediccions <todo></todo>
+- Conclusions <todo></todo>
 
 ## Enunciat
-- Sèrie temporal trimestral: vendes d'un producte en milers
+- Sèrie temporal trimestral
+  - Vendes d'un producte en milers
 - El 80% de les dades són per aprendre, el 20% restant per avaluar la capacitat predictiva
 
 . . .
@@ -78,6 +85,11 @@ axis(1, at = x, labels = x)
 ```
 
 ## Estacionalitat
+:::: {.columns}
+
+::: {.column width="75%"}
+
+
 ```{r}
 mes2 <- factor((1:n_data %% 4), levels = 0:3)
 levels(mes2)[levels(mes2) == "0"] <- "4"
@@ -89,6 +101,8 @@ ggplot(df_aux, aes(x = mes2, y = data)) +
   geom_boxplot() +
   theme(axis.text.x=element_text(angle=90,hjust=1)) 
 ```
+:::
+::: {.column width="25%"}
 
 ```{r}
 
@@ -96,6 +110,8 @@ cat("p-valor", (summary(aov(data ~ mes2, data=df_aux ))[[1]][["Pr(>F)"]][1]), "\
 
 pairwise.t.test(df_aux$data, df_aux$mes2, paired=TRUE)
 ```
+:::
+::::
 
 ## ACF
 ```{r}
@@ -126,6 +142,8 @@ plot(mult)
 ```
 
 ## Comparativa (I)
+<gra>Això ja és des model simplificat. Ho posam abans d'aquesta diapo o ho deim allà?</gra>
+<gra>També hauríem de mostrar lo que mos dona es model per veure a ull que sa variança des residus es sa mateixa. Jo proòs no posar es `decompose()` d'abans pq total no els feim servir i dibuixar es simplificats, dient a sa presentació que no mos serveixen pq no podem fer prediccions</gra>
 ```{r}
 # Restam la recta a la sèrie
 e_add=data-tendencia$fitted.values
@@ -172,8 +190,8 @@ legend("topleft", legend = c("original", "model additiu", "model multiplicatiu")
 ```
 
 ```{r}
-print(paste("Model additiu: ", mean(na.omit((model_add - data))^2)))
-print(paste("Model multiplicatiu: ", mean(na.omit((model_mult - data))^2)))
+print(paste("EQM Model additiu:       ", mean(na.omit((model_add - data))^2)))
+print(paste("EQM Model multiplicatiu: ", mean(na.omit((model_mult - data))^2)))
 
 ```
 
@@ -185,8 +203,8 @@ plot(density(na.omit(res_mult)), main = "Densitat residus Mult", xlab = "residus
 ```
 
 ```{r}
-shapiro.test(res_add)
-shapiro.test(res_mult)
+shapiro.test(res_add)$p.value
+shapiro.test(res_mult)$p.value
 ```
 
 
@@ -221,6 +239,7 @@ plot.ts(ts_completa, xlab = "Temps", ylab = "Vendes en milers", xaxt="n")
 axis(1, at = x, labels = x)
 
 lines(ts_mult_c, col = "blue")
+lines(rep(10, 180-30+1), 30:180, lty = "dashed")
 
 legend("topleft", legend = c("original", "model multiplicatiu"), col = c("black", "blue"), lty = 1)
 

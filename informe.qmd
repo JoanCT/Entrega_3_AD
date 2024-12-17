@@ -59,7 +59,7 @@ library(ggcorrplot)
 
 Enllaç [git](https://github.com/JoanCT/Practica7_AD).
 
-<todo>Queda per fer: introducció, conclusions</todo>
+<todo>Queda per fer: introducció, conclusions, README</todo>
 
 ## Enunciat
 
