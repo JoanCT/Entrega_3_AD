@@ -115,12 +115,9 @@ A simple vista es pot apreciar un comportament oscil·lant i, per tant <jct>jo n
 
 ```{r}
 tendencia=lm(data ~ time(ts))
-
 e=data-tendencia$fitted.values
 e_ts=ts(e, frequency = 4)
-
 par(mfrow=c(2,1))
-
 plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
 lines(c(1,60), c(10,160), type='l')
 axis(1, at = x, labels = x)
@@ -313,54 +310,23 @@ Anem a intentar preveure, a partir del model additatiu, la sèrie temporal pels 
 
 ```{r}
 # Crear el vector original de 48 elements
-vector <- seq(from = 1, by = 0.25, length.out = 48)
-n <- 36 
-
-time_extended <- c(vector, (n+1):(n+12))
-
-new_data <- data.frame(time.ts = time_extended)
-
-
-tend <- predict(tendencia, newdata = new_data)  
+n=36
+data_2=raw_data[1:48,]
+time_extended <- seq(from = 1, by = 0.25, length.out = 48)
+ts_2 <- ts(data_2, frequency = 4)
+model=lm(data_2~time(ts_raw))
+new_data <- data.frame( time.ts=time_extended)
+tend <- predict(model,newdata = new_data) 
 tendencia_futura <- tend[(n+1):(n+12)]  
-
 # Estacionalidat
 estacionalitat <- add$seasonal
-estacionalitat_futura <- rep(estacionalitat[1:4], 3)  
-
-# Calcular la previsión sumando tendencia y estacionalidad futura
-previsio <- tendencia_futura + estacionalitat_futura
-
-estacionalitat_futura
-tendencia_futura
+estacionalitat_futura <- rep(estacionalitat[1:4], 3)
+# Calcular la previsió sumant tendència y estacionalitat futura
+previsio_add <- tendencia_futura + estacionalitat_futura
+ts_prediccions_add <- ts(previsio_add, start = c(2024, 1), frequency = 4)
+ts_combinada_add <- ts(c(ts, ts_prediccions_add), start = start(ts), frequency = 4)
+plot(ts_combinada_add, type = "l", col = "blue", lwd = 2, xlab = "Temos", ylab = "Ventes en milers", main = "Comparació de la Sèrie original amb la previsió")
+lines(ts_2, col = "black", lwd = 2)
 ```
+Com podem observar, la previsió no és gens bona, llavors hauríem de preveure la sèrie amb un altre model. 
 
-
->>>>>>> 295ca5eef7df5e9b22c7febd745658466a3c763f
-
-Anem a intentar preveure, a partir del model additatiu, la sèrie temporal pels 12 termes restants. Per això, el que farem sirà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regresió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem sirà repetir els 4 últims valors d'estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc sirà l'error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l'estimació:
-
-```{r}
-# Crear el vector original de 48 elements
-vector <- seq(from = 1, by = 0.25, length.out = 48)
-n <- 36 
-
-time_extended <- c(vector, (n+1):(n+12))
-
-new_data <- data.frame(time.ts = time_extended)
-
-
-tend <- predict(tendencia, newdata = new_data)  
-tendencia_futura <- tend[(n+1):(n+12)]  
-
-# Estacionalidat
-estacionalitat <- add$seasonal
-estacionalitat_futura <- rep(estacionalitat[1:4], 3)  
-
-# Calcular la previsión sumando tendencia y estacionalidad futura
-previsio <- tendencia_futura + estacionalitat_futura
-
-estacionalitat_futura
-tendencia_futura
-
-```
