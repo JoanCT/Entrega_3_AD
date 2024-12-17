@@ -54,7 +54,6 @@ library(moments)
 - Les 12 darreres per avaluar els pronòstics
   
 ## Sèrie temporal
-<gra>Si posam literalment es codi de R funciona</gra>
 ```{r}
 # totes les dades
 raw_data <- read.csv("ts.csv",
@@ -68,14 +67,35 @@ n_data <- n_data - (n_data %% 4)
 data <- raw_data[1:n_data,]
 ts <- ts(data, frequency = 4)
 
+tendencia=lm(data ~ time(ts))
+
 # dibuixam les dades en un gràfic
 x=1:11
 plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
 lines(c(1,60), c(10,160), type='l')
+abline(tendencia, col = "blue", lwd = 2)
 axis(1, at = x, labels = x)
 ```
 
-<gra>Jo comentaria damunt això per no perdre es gràfic de vista</gra>
+## Estacionalitat
+```{r}
+mes2 <- factor((1:n_data %% 4), levels = 0:3)
+levels(mes2)[levels(mes2) == "0"] <- "4"
+mes2 <- factor(mes2, levels = c("1","2","3","4"))
+df_aux = data.frame(mes2, data)
+ggplot(df_aux, aes(x = mes2, y = data)) +
+  xlab("Trimestre") + 
+  ylab("Vendes en milers")+
+  geom_boxplot() +
+  theme(axis.text.x=element_text(angle=90,hjust=1)) 
+```
+
+```{r}
+
+cat("p-valor", (summary(aov(data ~ mes2, data=df_aux ))[[1]][["Pr(>F)"]][1]), "\n")
+
+pairwise.t.test(df_aux$data, df_aux$mes2, paired=TRUE)
+```
 
 ## ACF
 ```{r}
@@ -91,7 +111,120 @@ pacf(ts)
 
 # Model additiu i multiplicatiu
 
+## Model additiu
+- $y_t = \mu_t + S_t + a_t$
+```{r}
+add = decompose(ts, type = "additive")
+plot(add)
+```
+
+## Model multiplicatiu
+- $y_t = \mu_t \cdot S_t \cdot a_t$
+```{r}
+mult = decompose(ts, type = "multiplicative")
+plot(mult)
+```
+
+## Comparativa (I)
+```{r}
+# Restam la recta a la sèrie
+e_add=data-tendencia$fitted.values
+e_ts_add=ts(e_add,frequency = 4)
+e_mult=data/tendencia$fitted.values
+e_ts_mult=ts(e_mult,frequency = 4)
+#plot(ts, type = "l", col = "blue", lwd = 2, xlab = "Temps", ylab = "Ventes en milers", #main = "Comparació de la Sèrie original amb la previsió")
+#plot(e_ts, type = "l", col = "black", lwd = 2, xlab = "Temos", ylab = "Ventes en milers", #main = "Comparació de la Sèrie original amb la previsió")
+
+#mitjana de la serie sense tendència
+e_barra_add=mean(e_ts_add) 
+e_barra_mult=mean(e_ts_mult)
+#vector pels coeficientes estacionals
+s_add=rep(0,4) 
+s_mult=rep(0,4)
+for(j in 1:4){
+  indice_j=seq(j,36,by=4)
+  s_add[j]=mean(e_ts_add[indice_j])-e_barra_add
+  s_mult[j]=mean(e_ts_mult[indice_j])/e_barra_mult
+}
+#Calculam els residus
+s_compl_add=rep(s_add,9) 
+s_compl_mult=rep(s_mult,9) 
+#s_compl
+res_add=e_ts_add-s_compl_add
+res_mult=e_ts_mult/s_compl_mult
+```
+
+```{r}
+model_add = tendencia$fitted.values + s_compl_add
+model_mult = tendencia$fitted.values* s_compl_mult
+
+ts_add = ts(model_add, frequency = 4)
+ts_mult = ts(model_mult, frequency=4)
+
+plot.ts(ts, xlab = "Temps", ylab = "Vendes en milers", xaxt="n")
+axis(1, at = x, labels = x)
+
+lines(ts_add, col = "red")
+lines(ts_mult, col = "blue")
+
+legend("topleft", legend = c("original", "model additiu", "model multiplicatiu"), col = c("black","red", "blue"), lty = 1)
+
+```
+
+```{r}
+print(paste("Model additiu: ", mean(na.omit((model_add - data))^2)))
+print(paste("Model multiplicatiu: ", mean(na.omit((model_mult - data))^2)))
+
+```
+
+## Comparativa (II)
+```{r}
+par(mfrow=c(1,2))
+plot(density(na.omit(res_add)), main = "Densitat residus Add", xlab = "residus Add", ylab = "Densitat")
+plot(density(na.omit(res_mult)), main = "Densitat residus Mult", xlab = "residus Mult", ylab = "Densitat")
+```
+
+```{r}
+shapiro.test(res_add)
+shapiro.test(res_mult)
+```
+
+
+
 # Prediccions
+
+## Model multiplicatiu
+
+```{r}
+# Extreim els elements que necessitam per a la predicció
+intercept = as.numeric(tendencia$coefficients[1])
+coef = as.numeric(tendencia$coefficients[2])
+estacionalitat_mult <- s_mult
+
+#predim els valors
+prediccions_mult = 37:48
+
+for (i in 1:length(prediccions_mult)){
+  aux = i %% 4
+  if (aux == 0){
+    aux = 4
+  }
+  prediccions_mult[i] = (coef * (prediccions_mult[i]/4) + intercept)* s_mult[aux]
+}
+
+
+mult_completa = c(as.vector(model_mult), prediccions_mult)
+ts_mult_c = ts(mult_completa, frequency= 4)
+ts_completa = ts(raw_data, frequency = 4)
+x=1:13
+plot.ts(ts_completa, xlab = "Temps", ylab = "Vendes en milers", xaxt="n")
+axis(1, at = x, labels = x)
+
+lines(ts_mult_c, col = "blue")
+
+legend("topleft", legend = c("original", "model multiplicatiu"), col = c("black", "blue"), lty = 1)
+
+```
 
 
 # Diapositives de prova

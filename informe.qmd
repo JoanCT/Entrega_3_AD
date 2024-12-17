@@ -71,10 +71,6 @@ La sèrie temporal [ts_1](https://github.com/igmuib/Practica_AD/blob/main/ts_1.c
 
 **(6.2)** Analitzau els gràfics ACF i PACF. Descomposau la sèrie d'acord amb un model additiu i un de multiplicatiu, seleccioneu el millor. Finalment, feis prediccions amb el model additiu o multiplicatiu que heu seleccionat, dibuixau els vostres pronòstics sobre la sèrie total (aprenentatge + test). Calculau l'error quadràtic mitjà de les prediccions i comentau el resultat en el context del problema.
 
-<gra>Ara pensava, ses dades s'organitzen per períodes de 4 trimestres i ses dades completes en tenen 48 (surt exacte), però quan feim es 80% no queden múltiples de 4. no sé si hauríem d'aproximar-ho perquè es múltiples siguin exactes</gra>
-
-<gra>Per exemple, a `?decompose` diu `This only works well if ‘x’ covers an integer number of complete`</gra>
-
 ## Introducció
 
 <jct> Desciben el contexto del problema ; Desciben cada una de las vaiables que confoman la base de datos del estudio ; Han explicado adecuadamente la metodología estadística que se utiliza en el estudio </jct>
@@ -122,7 +118,6 @@ abline(tendencia, col = "blue", lwd = 2)
 plot.ts(e_ts, xlab = "Temps", ylab = "Sèrie fora tendència", xaxt="n")
 axis(1, at = x, labels = x)
 
-
 ```
 
 A més, presenta una tendència clarament positiva (començam al voltant dels 60 milers i acabam al voltant del 120 milers). També s'aprecia una variabilitat més o manco constant, tot i que hi ha alguns períodes (6-7 o 9-10) amb pics més grans. Finalment, no s'aprecia cap fluctuació cíclica, la sèrie pareix bastant constant, tenint en compte l'estacionalitat i la tendència.
@@ -165,40 +160,18 @@ pacf(ts)
 
 En el primer gràfic (ACF) es pot observar una clara estacionalitat, idò s'aprecia un comportament oscil·lant i repetitiu. A més, les correlacions decreixen poc a poc degut a la tendència. Pel que fa al PACF, es pot veure que una observació influeix significativament a dos trimestres més endavant (també influeix al següent però de manera no tan significativa).
 
-<jct>Això ho hauríem de fer en cas que necessitàssim una sèrie estacionària per aplicar certes tècniques d'anàlisi (crec que no és el cas). Demà li demanam a n'irene i depenent de si fa falta o no ja ho borram / detallam més </jct>
-
-<gra>Per ses diferències, pensava pentura té mes sentit fer sa diferencia $y_t - y_{t-2}$, ja que estan més correlacionades</gra>
-
-```{r}
-# Ho miram havent llevat tendència, i igualment se veu el patró
-log_ts = ts(log(data), frequency=4)
-plot.ts(diff(log_ts))
-acf(diff(log_ts))
-pacf(diff(log_ts))
-```
-
-<jct>Dues diff:</jct>
-
-```{r}
-# Ho miram havent llevat tendència, i igualment se veu el patró
-log_ts = ts(log(data), frequency=4)
-plot.ts(diff(diff(log_ts)))
-acf(diff(diff(log_ts)))
-pacf(diff(diff(log_ts)))
-```
-
 ## Models additiu i multiplicatiu
 
 Hem vist a l'anàlisi exploratòria que la variabilitat no creix amb el temps. Per tant, esperam que un model additiu s'ajusti més que un de multiplicatiu.
 
-El model additiu és el següent.
+El model additiu ve donat per $y_t = \mu_t + S_t + a_t$. Empram la funció pròpia de R per veure aquesta descomposició.
 
 ```{r}
 add = decompose(ts, type = "additive")
 plot(add)
 ```
 
-Com es pot apreciar, hi ha una tendència creixent i una forta estacionalitat. Vegem ara el multiplicatiu
+Com es pot apreciar, hi ha una tendència creixent i una forta estacionalitat. Vegem ara el multiplicatiu, que ve donat per $y_t = \mu_t \cdot S_t \cdot a_t$, amb la funció pròpia de R.
 
 ```{r}
 mult = decompose(ts, type = "multiplicative")
@@ -206,6 +179,10 @@ plot(mult)
 ```
 
 De la mateixa manera es veu una tendència creixent, estacionalitat i, comparant-ho amb l'additiu, no s'aprecien moltes diferències.
+
+Ara bé, aquests models no podrem emprar-los per predir valors futurs, perquè la tendència calculada en ambdós models no la podem extendre en el futur, i per tant no podem fer prediccions a partir de la descomposició així calculada. Per això, calcularem nosaltres mateixos la tendència i els coeficients estacionals d'ambdós models.
+
+<!--
 
 <gra>Jo diria que és millor s'additiu pq s'estacionalitat no decreix ni creix, però li podem demanar mem com ho feim per determinar quin és millor, an es apunts no he trobat res. Pentura es millor és simplement fent EQM (Error Quadràtic Mitjà) de com s'ajusta es model a ses dades i triar es millor. O bé mirant es ACF/PACF i veure quins estan més a ses línies blaves, però be crec que dona parescut i no se distingeix molt</gra>
 
@@ -230,53 +207,75 @@ print(var_res_mult)
 Pentura a nes grafic següent calculam distàncies entre original i cada model, i mos quedam amb es que minimitzi sa distància? (MSE com demana a s'exercici)
 
 <gra>Sí, i també podem aplicar es dos models per fer ses prediccions i, com les tenim, veure quin s'ajusta més</gra>
+-->
 
-##Els nostres models
+## Els nostres models
+<!--
 La cosa és que per fer el pronòstic, no tenim la tendència, només una aproximació a partir de la recta de regressió lineal. Aleshores els resultats vists anteriorment no ens serveixen per determinar quin model ens modela millor per fer previsions futures. Per tant, el que hem de fer per modelar la sèrie és calcular uns valors d'estacionalitat a partir dels de la recta de regressió. Després, tindrem el renou d'aquest nou model i decidirem:
+-->
 
+Per a poder fer prediccions futures, prendrem com a tendència de la sèrie la recta de regressió. A partir d'aquesta, i restant-la (model additiu) o dividint-la (model multiplicatiu), obtenim una sèrie (diguem-li ts2) fora tendència de la qual podem extreure-ne els components estacionals.
+
+Comprovem primer que la recta de regressió és prou bona
 ```{r}
-# Restamos esta recta a la serie
-e=data-tendencia$fitted.values
-e_ts=ts(e,frequency = 4)
-e_ts
-plot(ts, type = "l", col = "blue", lwd = 2, xlab = "Temos", ylab = "Ventes en milers", main = "Comparació de la Sèrie original amb la previsió")
-plot(e_ts, type = "l", col = "black", lwd = 2, xlab = "Temos", ylab = "Ventes en milers", main = "Comparació de la Sèrie original amb la previsió")
+summary(tendencia)
 ```
+Com que els coeficients són significatius i l'R quadrat ajustat és de quasi 0.6, seguim endavant.
 
-Ara calcularem els residus
+Per extreure els components estacionals, restam (cas additiu) o dividim (cas multiplicatiu) la mitjana de la sèrie ts2 a la mitjana de cada mateix trimestre de l'any. Finalment, restam (cas additiu) o dividim (cas multiplicatiu) aquests coeficients a ts2 per obtenir els residus dels models.
+
 ```{r}
-e_barra=mean(e_ts) #mitjana de la serie sense tendència
-s=rep(0,4) #vector pels coeficientes estacionals
+# Restam la recta a la sèrie
+e_add=data-tendencia$fitted.values
+e_ts_add=ts(e_add,frequency = 4)
+e_mult=data/tendencia$fitted.values
+e_ts_mult=ts(e_mult,frequency = 4)
+#plot(ts, type = "l", col = "blue", lwd = 2, xlab = "Temps", ylab = "Ventes en milers", #main = "Comparació de la Sèrie original amb la previsió")
+#plot(e_ts, type = "l", col = "black", lwd = 2, xlab = "Temos", ylab = "Ventes en milers", #main = "Comparació de la Sèrie original amb la previsió")
+
+#mitjana de la serie sense tendència
+e_barra_add=mean(e_ts_add) 
+e_barra_mult=mean(e_ts_mult)
+#vector pels coeficientes estacionals
+s_add=rep(0,4) 
+s_mult=rep(0,4)
 for(j in 1:4){
   indice_j=seq(j,36,by=4)
-  s[j]=mean(e_ts[indice_j])-e_barra
+  s_add[j]=mean(e_ts_add[indice_j])-e_barra_add
+  s_mult[j]=mean(e_ts_mult[indice_j])/e_barra_mult
 }
-#Calculamos els residuos
-s_compl=rep(s,8) 
-s_compl
-a=e_ts-s_compl
-b=e_ts/s_compl
-plot.ts(a,xlab="Temps",ylab="Residus")
-plot.ts(b,xlab="Temps",ylab="Residus")
+#Calculam els residus
+s_compl_add=rep(s_add,9) 
+s_compl_mult=rep(s_mult,9) 
+#s_compl
+res_add=e_ts_add-s_compl_add
+res_mult=e_ts_mult/s_compl_mult
+par(mfrow=c(1,2))
+plot.ts(res_add,xlab="Temps",ylab="Residus", main = "Model additiu")
+plot.ts(res_mult,xlab="Temps",ylab="Residus",  main = "Model multiplicatiu")
 
 ```
-Ara ja tenim els residuals del model additiu pel quarem farem la nostra predicció. Per veure si és un bon model, anem a veure si els errors segueixen una distribució normal (\textit{White Noise})
+Per veure si són bons models, anem a veure si els errors segueixen una distribució normal amb distribució constant i mitjanes 0 (cas additiu) o 1 (cas multiplicatiu)
 ```{r}
-plot(density(na.omit(a)), main = "Densitat residus Add", xlab = "residus Add", ylab = "Densitat")
-plot(density(na.omit(b)), main = "Densitat residus Mult", xlab = "residus Mult", ylab = "Densitat")
+par(mfrow=c(1,2))
+plot(density(na.omit(res_add)), main = "Densitat residus Add", xlab = "residus Add", ylab = "Densitat")
+plot(density(na.omit(res_mult)), main = "Densitat residus Mult", xlab = "residus Mult", ylab = "Densitat")
 ```
 Farem un Shapiro test per veure si segueix notmalitat:
 ```{r}
-shapiro.test(a)
-shapiro.test(b)
+shapiro.test(res_add)
+shapiro.test(res_mult)
 ```
+Veim que en ambdós models obtenim residus que segueixen una distribució normal, en l'additiu amb mitjana 0 i en el multiplicatiu amb mitjana 1. A més, en el gràfic es pot veure que la variància es manté més o manco constant.
+
+<jct >Hauríem de comprovar si tenen variància constant. Quin test és això?..</jct>
 
 
-
+Visualitzem els dos models sobre la sèrie original:
 
 ```{r}
-model_add = tendencia$fitted.values + s_compl
-model_mult = mult$trend* mult$seasonal
+model_add = tendencia$fitted.values + s_compl_add
+model_mult = tendencia$fitted.values* s_compl_mult
 
 ts_add = ts(model_add, frequency = 4)
 ts_mult = ts(model_mult, frequency=4)
@@ -287,22 +286,28 @@ axis(1, at = x, labels = x)
 lines(ts_add, col = "red")
 lines(ts_mult, col = "blue")
 
-legend("topleft", legend = c("original", "model additiu", "model multiplicatiu"), col = c("black","blue", "red"), lty = 1)
+legend("topleft", legend = c("original", "model additiu", "model multiplicatiu"), col = c("black","red", "blue"), lty = 1)
 
 ```
 
-<gra>Faig lo des EQM</gra>
+Calculam l'Error Quadràtic Mitjà (MSE) entre els models i les dades
 
 ```{r}
-mean(na.omit((model_add - data))^2)
-mean(na.omit((model_mult - data))^2)
+print(paste("Model additiu: ", mean(na.omit((model_add - data))^2)))
+print(paste("Model multiplicatiu: ", mean(na.omit((model_mult - data))^2)))
+
 ```
+En vista que el model multiplicatiu presenta un MSE menor, i té un p-valor major en el test de normalitat dels residus, seleccionarem aquest per fer les prediccions futures.
+
 
 <gra>Mirant això (que per jo és lo més intuïtiu per comparar una o s'altre) veim que es model multiplicatiu s'ajusta millor que l'additiu, encara que són tan parescuts que realment podríem agafar qualsevol</gra>
+<!--
+
+<jct>Això borrar, és del model antic</jct>
 
 Mirem quins dels residuals de les sèries anteriors segueix una distribució normal, ja que si els errors segueixen normalitat (*White noise*), llavors ens indica que el model està ben ajustat. Fem la prova de Shapiro-Milk per ambdós models:
 
-```{r}
+```{r, eval=FALSE}
 residuales_add <- na.omit(add$random)
 residuales_mult <- na.omit(mult$random)
 
@@ -321,19 +326,14 @@ print(res_mult)
 ```
 
 Com podem comprovar, cap dels models té uns residuals que segueixin una distribució normal, així, concloem dient que els models no són bons.
+-->
 
 ## Pronòstic
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<gra>An es apunts diu això per predir: "La predicción de la serie se realiza sumando las estimaciones de la tendencia y el factor estacional que corresponde a cada observación." Però clar, a s'additiu per exemple tenim $y_t = \mu_t + S_t + a_t$ on tot depen de $t$, però ara per fer es pronostics no tenim ni $\mu_t$ ni $S_t$. Pentura s'ha d'estimar sa tendència com una recta de regressió i sa $S_t$ sa mateixa per tots es períodes depenent de s'estació</gra> <jct>Tendria sentit que fos això darrer que comentes. Demà li demanam si només se referia a això o a models més elaborats (però q ns on emplearien es models additius / multiplcatius) </jct>
-=======
-Anem a intentar preveure, a partir del model additatiu, la sèrie temporal pels 12 termes restants. Per això, el que farem sirà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regresió lineal (vista a l'inici del projecte). Pel que fa l'estacionalitat, no podem emprar la del \texttt{descompose()} ja que aquella estacionalitat està relacionada amb la tendènica calculada al model esmentat. El que hem de fer per modelar la sèrie és calcular uns valors d'estacionalitat a partir dels de la recta de regressió:
-=======
-Anem a intentar preveure, a partir del model additiu, la sèrie temporal pels 12 termes restants. Per això, el que farem sirà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regressió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem sirà repetir els 4 últims valors d'estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc sirà l'error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l'estimació:
->>>>>>> 3d4a6d223c95d6ba1bfc79af0f983ef52b5ec16d
 
-```{r}
+<!--
+
+```{r, eval=FALSE}
 # Crear el vector original de 48 elements
 n=36
 data_2=raw_data[1:48,]
@@ -356,7 +356,7 @@ lines(ts_2, col = "black", lwd = 2)
 Com podem observar, la previsió no és gens bona, llavors hauríem de preveure la sèrie amb un altre model. 
 
 
-```{r}
+```{r, eval=FALSE}
 # Extreim els elements que necessitam per a la predicció
 intercept = as.numeric(tendencia$coefficients[1])
 coef = as.numeric(tendencia$coefficients[2])
@@ -381,30 +381,66 @@ prediccions_add
 prediccions_mult
 
 ```
+-->
 
-Altre manera de fer prediccions:
+<jct>Versió mike per l'additiu</jct>
+
+Anem a intentar preveure, a partir del model additiu , la sèrie temporal pels 12 termes restants. Per això, el que farem sirà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regressió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem sirà repetir els 4 últims valors d'estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc sirà l'error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l'estimació:
+
 ```{r}
 n=36
 data_2=raw_data[1:48,]
 time_extended <- seq(from = 1, by = 0.25, length.out = 48)
 ts_2 <- ts(data_2, frequency = 4)
-model=lm(data_2~time(ts_raw))
+model=lm(data_2~time(ts_raw)) 
 new_data <- data.frame( time.ts=time_extended)
 tend <- predict(model,newdata = new_data)
-estacionalitat=rep(s,12)
+estacionalitat=rep(s_add,12)
 ts_pred=ts(tend+estacionalitat,frequency=4)
 plot(ts_pred, type = "l", col = "blue", lwd = 2, xlab = "Temps", ylab = "Ventes en milers", main = "Comparació de la Sèrie original amb la previsió")
 lines(ts_2, col = "black", lwd = 2)
 ```
+Com podem observar, la previsió no és gens bona, llavors hauríem de preveure la sèrie amb un altre model. 
 
-```{r}
+<jct>Versió per al multiplicatiu </jct>
+A partir del model multiplicatiu, predirem els valors de la sèrie temporal pels 12 trimestres següents. Per això, el que farem sirà multiplicar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regressió lineal (vista a l'inici de l'exercici). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem sirà repetir 3 vegades els 4 últims valors d'estacionalitat calculats anteriorment. El terme de renou no el tenim en compte per a la predicció, i per tant formarà part de l'error del model. Anem a calcular l'estimació:
+
+<!-- Model antic 
+```{r, eval=FALSE}
+# Extreim els elements que necessitam per a la predicció
+intercept = as.numeric(tendencia$coefficients[1])
+coef = as.numeric(tendencia$coefficients[2])
+estacionalitat_add <- add$seasonal[1:4]
+estacionalitat_mult <- mult$seasonal[1:4]
+
+#predim els valors
+prediccions_add = 37:48
+prediccions_mult = 37:48
+prediccions_mult[1]
+
+for (i in 1:length(prediccions_mult)){
+  aux = i %% 4
+  if (aux == 0){
+    aux = 4
+  }
+  print(prediccions_add[i]/4)
+  prediccions_add[i] = coef * (prediccions_add[i]/4) + intercept + estacionalitat_add[aux]
+  prediccions_mult[i] = (coef * (prediccions_mult[i]/4) + intercept)* estacionalitat_mult[aux]
+}
+
+prediccions_add
+prediccions_mult
+```
+
+
+```{r, eval=FALSE}
 #Afegim els que falten, per a les observacions 35 i 36
 add_intermedis = c(coef * (35/4) + intercept + estacionalitat_add[3],coef * (36/4) + intercept + estacionalitat_add[4])
 mult_intermedis = c((coef * (35/4) + intercept)* estacionalitat_mult[3],(coef * (36/4) + intercept)* estacionalitat_mult[4]) 
 add_intermedis
 ```
 
-```{r}
+```{r, eval=FALSE}
 add_completa = c(as.vector(model_add)[-(35:36)], add_intermedis, prediccions_add)
 ts_add_c = ts(add_completa, frequency= 4)
 mult_completa = c(as.vector(model_mult)[-(35:36)], mult_intermedis, prediccions_mult)
@@ -420,4 +456,41 @@ lines(ts_mult_c, col = "blue")
 legend("topleft", legend = c("original", "model additiu", "model multiplicatiu"), col = c("black","red", "blue"), lty = 1)
 
 ```
+-->
+
+```{r}
+# Extreim els elements que necessitam per a la predicció
+intercept = as.numeric(tendencia$coefficients[1])
+coef = as.numeric(tendencia$coefficients[2])
+estacionalitat_mult <- s_mult
+
+#predim els valors
+prediccions_mult = 37:48
+
+for (i in 1:length(prediccions_mult)){
+  aux = i %% 4
+  if (aux == 0){
+    aux = 4
+  }
+  prediccions_mult[i] = (coef * (prediccions_mult[i]/4) + intercept)* s_mult[aux]
+}
+
+
+mult_completa = c(as.vector(model_mult), prediccions_mult)
+ts_mult_c = ts(mult_completa, frequency= 4)
+ts_completa = ts(raw_data, frequency = 4)
+x=1:13
+plot.ts(ts_completa, xlab = "Temps", ylab = "Vendes en milers", xaxt="n")
+axis(1, at = x, labels = x)
+
+lines(ts_mult_c, col = "blue")
+
+legend("topleft", legend = c("original", "model multiplicatiu"), col = c("black", "blue"), lty = 1)
+
+```
+
+Veim que la previsió segueix el patró de la sèrie, però s'equivoca en les magnituds dels pics.
+
+FALTA CALCULAR MSE DE LA PREDICCIÓ I FER CONCLUSIÓ
+
 
