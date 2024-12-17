@@ -105,11 +105,7 @@ lines(c(1,60), c(10,160), type='l')
 axis(1, at = x, labels = x)
 ```
 
-A simple vista es pot apreciar un comportament oscil·lant i, per tant <jct>jo no se si posaria pe tant: pot ser oscil·lant i fora estacionalitat</jct>, presenta estacionalitat, idò oscil·la amb els canvis d'estació, encara que no podem saber si hi ha més vendes a l'hivern i estiu o a la primavera i tardor, idò no tenim informació sobre el començament de la sèrie. En el context del problema, es podria tractar de venda de roba d'entretemps, per exemple, ja que es vendria més en tardor i primavera.
-
-<jct>Jo posaria dos exemples d'interpretació depenent de si comença a trimestre 1/3 o 2/4. Si tenim 4 trimestres, son 1: gener-març, 2: abril-juny, 3:juliol-setembre, 4:octubre-desembre. Primavera i tardor corresponen a trimestres 2 i 4, tendria sentit si començas amb un d'aquests. Si començàs a trimestre 1 o 3, podríem dir que es pics se corresponen amb ses temporades de rebaixes (que són al gener i al juliol. i per tant pics a trimestres 1 i 3)</jct>
-
-<jct>Ho reescriuria com</jct> A simple vista es pot apreciar un comportament oscil·lant i amb presència d'estacionalitat, ja que les oscil·lacions presenten un patró determinat corresponent a les estacions. Ara bé, no podem saber si hi ha més vendes a l'hivern i estiu o a la primavera i tardor, idò no tenim informació sobre el començament de la sèrie. En el cas que la sèrie començàs pel primer (o tercer) trimestre de l'any, podria tractar-se d'una tenda de roba genèrica, i les vendes es concentraríen en els trimestres 1 i 3 de l'any, per mor de les rebaixes del gener i del juliol. Altrament, si la sèrie començàs al segon (o quart) semestre de l'any, es podria tractar de venda de roba d'entretemps, ja que es vendria més a la tardor i primavera.
+ A simple vista es pot apreciar un comportament oscil·lant i amb presència d'estacionalitat, ja que les oscil·lacions presenten un patró determinat corresponent a les estacions. Ara bé, no podem saber si hi ha més vendes a l'hivern i estiu o a la primavera i tardor, idò no tenim informació sobre el començament de la sèrie. En el cas que la sèrie començàs pel primer (o tercer) trimestre de l'any, podria tractar-se d'una tenda de roba genèrica, i les vendes es concentraríen en els trimestres 1 i 3 de l'any, per mor de les rebaixes del gener i del juliol. Altrament, si la sèrie començàs al segon (o quart) semestre de l'any, es podria tractar de venda de roba d'entretemps, ja que es vendria més a la tardor i primavera.
 
 ```{r}
 tendencia=lm(data ~ time(ts))
@@ -131,19 +127,7 @@ axis(1, at = x, labels = x)
 
 A més, presenta una tendència clarament positiva (començam al voltant dels 60 milers i acabam al voltant del 120 milers). També s'aprecia una variabilitat més o manco constant, tot i que hi ha alguns períodes (6-7 o 9-10) amb pics més grans. Finalment, no s'aprecia cap fluctuació cíclica, la sèrie pareix bastant constant, tenint en compte l'estacionalitat i la tendència.
 
-També podem estudiar l'estacionalitat amb un boxplot per cadascun dels trimestres. <jct>Pq al boxplot comences a comptar pel 2 en lloc de l'1 ? Pq tengui sentit amb es gràfic ts, han de sortir 1 i 3 alts, en lloc de 2 i 4, no?</jct>
-
-```{r}
-mes2 <- factor(1:n_data %% 4 + 1, levels = 1:4)
-df_aux = data.frame(mes2, data)
-ggplot(df_aux, aes(x = mes2, y = data)) +
-  xlab("Trimestre") + 
-  ylab("Vendes en milers")+
-  geom_boxplot() +
-  theme(axis.text.x=element_text(angle=90,hjust=1)) 
-```
-
-<gra>Què comentam d'aquí? Se veu que oscil·la però uf se solapen, hauríem de fer una ANOVA o algo?</gra> <jct>Provant de començar a comptar per 1</jct>
+També podem estudiar l'estacionalitat amb un boxplot per cadascun dels trimestres. 
 
 ```{r}
 mes2 <- factor((1:n_data %% 4), levels = 0:3)
@@ -169,9 +153,6 @@ pairwise.t.test(df_aux$data, df_aux$mes2, paired=TRUE)
 
 Amb un test d'anova i de comparació de mitjanes veim que hi ha diferències significatives entre les mitjanes del 3r al 4t i 2n semestre, i p-valors propers a 0.1 entre el 1r al 2n i 4t semestre. Així, podem corroborar que es dona l'estacionalitat esmentada.
 
-<gra>Ara se pot estudiar s'estacionalitat i sa variabilitat com fa ella amb sa recta de regressió i calculant es coeficients, però no sé si fa falta</gra>
-
-<gra>És que sa descomposició de sa sèrie de R ja és quan assumim es model additiu i es multiplicatiu, que és sa segona part</gra>
 
 ### ACF i PACF
 
