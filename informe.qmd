@@ -330,3 +330,60 @@ lines(ts_2, col = "black", lwd = 2)
 ```
 Com podem observar, la previsió no és gens bona, llavors hauríem de preveure la sèrie amb un altre model. 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 295ca5eef7df5e9b22c7febd745658466a3c763f
+
+
+```{r}
+# Extreim els elements que necessitam per a la predicció
+intercept = as.numeric(tendencia$coefficients[1])
+coef = as.numeric(tendencia$coefficients[2])
+estacionalitat_add <- add$seasonal[1:4]
+estacionalitat_mult <- mult$seasonal[1:4]
+
+#predim els valors
+prediccions_add = 37:48
+prediccions_mult = 37:48
+prediccions_mult[1]
+
+for (i in 1:length(prediccions_add)){
+  aux = i %% 4
+  if (aux == 0){
+    aux = 4
+  }
+  print(prediccions_add[i]/4)
+  prediccions_add[i] = coef * (prediccions_add[i]/4) + intercept + estacionalitat_add[aux]
+  prediccions_mult[i] = (coef * (prediccions_mult[i]/4) + intercept)* estacionalitat_mult[aux]
+}
+
+prediccions_add
+prediccions_mult
+
+```
+
+```{r}
+#Afegim els que falten, per a les observacions 35 i 36
+add_intermedis = c(coef * (35/4) + intercept + estacionalitat_add[3],coef * (36/4) + intercept + estacionalitat_add[4])
+mult_intermedis = c((coef * (35/4) + intercept)* estacionalitat_mult[3],(coef * (36/4) + intercept)* estacionalitat_mult[4]) 
+add_intermedis
+```
+
+```{r}
+add_completa = c(as.vector(model_add)[-(35:36)], add_intermedis, prediccions_add)
+ts_add_c = ts(add_completa, frequency= 4)
+mult_completa = c(as.vector(model_mult)[-(35:36)], mult_intermedis, prediccions_mult)
+ts_mult_c = ts(mult_completa, frequency= 4)
+ts_completa = ts(raw_data, frequency = 4)
+x=1:13
+plot.ts(ts_completa, xlab = "Temps", ylab = "Vendes en milers", xaxt="n")
+axis(1, at = x, labels = x)
+
+lines(ts_add_c, col = "red")
+lines(ts_mult_c, col = "blue")
+
+legend("topleft", legend = c("original", "model additiu", "model multiplicatiu"), col = c("black","red", "blue"), lty = 1)
+
+```
+>>>>>>> fc01cc2406baa571412fed069d79ccf169ddd661
