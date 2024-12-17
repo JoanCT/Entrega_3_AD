@@ -3201,6 +3201,7 @@ window.Quarto = {
   <li><a href="#simplificació-dels-models" id="toc-simplificació-dels-models" class="nav-link" data-scroll-target="#simplificació-dels-models">Simplificació dels models</a></li>
   </ul></li>
   <li><a href="#pronòstic" id="toc-pronòstic" class="nav-link" data-scroll-target="#pronòstic">Pronòstic</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
   </ul>
 </nav>
 </div>
@@ -3274,6 +3275,7 @@ content: "]";
 </style>
 </div>
 <p>Enllaç <a href="https://github.com/JoanCT/Practica7_AD">git</a>.</p>
+<p><todo>Queda per fer: introducció, conclusions</todo></p>
 <section id="enunciat" class="level2">
 <h2 class="anchored" data-anchor-id="enunciat">Enunciat</h2>
 <p>La sèrie temporal <a href="https://github.com/igmuib/Practica_AD/blob/main/ts_1.csv">ts_1</a> correspon a les vendes (en milers d’unitats) d’un producte en una empresa durant diversos trimestres consecutius. L’empresa cerca desenvolupar un model de pronòstic per predir les vendes futures del producte. Per això, dividiu la sèrie temporal en dos trossos: un 80% de les primeres observacions les utilitzareu per “aprendre” i deixareu el 20% restant per avaluar la capacitat predictiva del model.</p>
@@ -3487,12 +3489,12 @@ W = 0.98113, p-value = 0.7828</code></pre>
 <pre><code>[1] &quot;Model multiplicatiu:  64.1098453899129&quot;</code></pre>
 </div>
 </div>
-<p>En vista que el model multiplicatiu presenta un MSE menor, i té un p-valor major en el test de normalitat dels residus, seleccionarem aquest per fer les prediccions futures.</p>
+<p>En vista que el model multiplicatiu presenta un MSE menor, i té un p-valor major en el test de normalitat dels residus, seleccionarem aquest per fer les prediccions futures. Tot i això, ja que disposam de les dades futures, aplicarem els dos models per comparar quin és millor amb les previsions, tot i que a la pràctica ens quedaríem amb el multiplicatiu ja que s’ajusta millor a les dades existents.</p>
 </section>
 </section>
 <section id="pronòstic" class="level2">
 <h2 class="anchored" data-anchor-id="pronòstic">Pronòstic</h2>
-<p>Anem a intentar preveure, a partir del model additiu , la sèrie temporal pels 12 termes restants. Per això, el que farem serà sumar la tendència amb l’estacionalitat. Recordem que la tendència l’aproximam amb una recta de regressió lineal (vista a l’inici del projecte). L’estacionalitat és periòdica, cada any és la mateixa, llavors el que farem serà repetir els 4 últims valors d’estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc serà l’error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l’estimació:</p>
+<p>Anem a intentar preveure, a partir del model additiu, la sèrie temporal pels 12 termes restants. Per això, el que farem serà sumar la tendència amb l’estacionalitat. Recordem que la tendència l’aproximam amb una recta de regressió lineal (vista a l’inici del projecte). L’estacionalitat és periòdica, cada any és la mateixa, llavors el que farem serà repetir els 4 últims valors d’estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc serà l’error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l’estimació:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -3502,8 +3504,14 @@ W = 0.98113, p-value = 0.7828</code></pre>
 </div>
 </div>
 </div>
-<p>Com podem observar, la previsió no és del tot bona, i de fet hem vist que és millor preveure la sèrie amb el model multiplicatiu.</p>
-<p>Per tant, a partir del model multiplicatiu, predirem els valors de la sèrie temporal pels 12 trimestres següents. Per això, el que farem serà multiplicar la tendència amb l’estacionalitat. Recordem que la tendència l’aproximam amb una recta de regressió lineal (vista a l’inici de l’exercici). L’estacionalitat és periòdica, cada any és la mateixa, llavors el que farem serà repetir 3 vegades els 4 últims valors d’estacionalitat calculats anteriorment. El terme de renou no el tenim en compte per a la predicció, i per tant formarà part de l’error del model. Anem a calcular l’estimació, de manera similiar al model additiu:</p>
+<p>A simple vista la previsió més o manco s’ajusta però no en el mateix nivell que quan només miràvem les dades d’aprenentatge. Comprovem-ho calculant l’error quadràtic mitjà (MSE):</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 143.6664</code></pre>
+</div>
+</div>
+<p>Com podem veure, presenta un error major al de les dades (<span class="math inline">\(143.66 &gt; 76.9\)</span>).</p>
+<p>De manera anàloga, a partir del model multiplicatiu, predirem els valors de la sèrie temporal pels 12 trimestres següents. Per això, el que farem serà multiplicar la tendència amb l’estacionalitat. Recordem que la tendència l’aproximam amb una recta de regressió lineal (vista a l’inici de l’exercici). L’estacionalitat és periòdica, cada any és la mateixa, llavors el que farem serà repetir 3 vegades els 4 últims valors d’estacionalitat calculats anteriorment. El terme de renou no el tenim en compte per a la predicció, i per tant formarà part de l’error del model. Anem a calcular l’estimació, de manera similiar al model additiu:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -3513,8 +3521,18 @@ W = 0.98113, p-value = 0.7828</code></pre>
 </div>
 </div>
 </div>
-<p>Veim que la previsió segueix el patró de la sèrie, però s’equivoca en les magnituds dels pics.</p>
-<p>FALTA CALCULAR MSE DE LA PREDICCIÓ I FER CONCLUSIÓ</p>
+<p>Veim que la previsió segueix el patró de la sèrie, però s’equivoca en les magnituds dels pics, i no se veu a simple vista una millora respecte l’additiu, sobretot per dos pics que queden bastant allunyats.</p>
+<p>De nou, calculem l’error quadràtic mitjà de l’aproximació:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 177.652</code></pre>
+</div>
+</div>
+<p>Pot parèixer sorprenent el fet que l’error sigui major al del model additiu, ja que havíem conclòs abans que el model multiplicatiu s’ajustava millor a les dades. Emperò, aquest cas es podia donar, idò que l’additiu s’ajusti pitjor a les dades no vol dir que per casualitat pronostiqui millor les dades futures.</p>
+<p>Tot i això, notem que això ho hem pogut fer ja que disposàvem de les dades futures, idò en cas contrari ens haguéssim quedat només amb el multiplicatiu o haguéssim hagut d’esperar un parell d’anys per arribar en aquesta conclusió.</p>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
 </section>
 
 </main>
