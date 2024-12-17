@@ -377,7 +377,7 @@ prediccions_add = 37:48
 prediccions_mult = 37:48
 prediccions_mult[1]
 
-for (i in 1:length(prediccions)){
+for (i in 1:length(prediccions_add)){
   aux = i %% 4
   if (aux == 0){
     aux = 4
