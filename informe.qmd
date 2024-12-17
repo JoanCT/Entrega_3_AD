@@ -306,7 +306,37 @@ Com podem comprovar, cap dels models té uns residuals que segueixin una distrib
 
 ## Pronòstic
 
+<<<<<<< HEAD
 <gra>An es apunts diu això per predir: "La predicción de la serie se realiza sumando las estimaciones de la tendencia y el factor estacional que corresponde a cada observación." Però clar, a s'additiu per exemple tenim $y_t = \mu_t + S_t + a_t$ on tot depen de $t$, però ara per fer es pronostics no tenim ni $\mu_t$ ni $S_t$. Pentura s'ha d'estimar sa tendència com una recta de regressió i sa $S_t$ sa mateixa per tots es períodes depenent de s'estació</gra> <jct>Tendria sentit que fos això darrer que comentes. Demà li demanam si només se referia a això o a models més elaborats (però q ns on emplearien es models additius / multiplcatius) </jct>
+=======
+Anem a intentar preveure, a partir del model additatiu, la sèrie temporal pels 12 termes restants. Per això, el que farem sirà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regresió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem sirà repetir els 4 últims valors d'estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc sirà l'error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l'estimació:
+
+```{r}
+# Crear el vector original de 48 elements
+vector <- seq(from = 1, by = 0.25, length.out = 48)
+n <- 36 
+
+time_extended <- c(vector, (n+1):(n+12))
+
+new_data <- data.frame(time.ts = time_extended)
+
+
+tend <- predict(tendencia, newdata = new_data)  
+tendencia_futura <- tend[(n+1):(n+12)]  
+
+# Estacionalidat
+estacionalitat <- add$seasonal
+estacionalitat_futura <- rep(estacionalitat[1:4], 3)  
+
+# Calcular la previsión sumando tendencia y estacionalidad futura
+previsio <- tendencia_futura + estacionalitat_futura
+
+estacionalitat_futura
+tendencia_futura
+```
+
+
+>>>>>>> 295ca5eef7df5e9b22c7febd745658466a3c763f
 
 Anem a intentar preveure, a partir del model additatiu, la sèrie temporal pels 12 termes restants. Per això, el que farem sirà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regresió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem sirà repetir els 4 últims valors d'estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc sirà l'error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l'estimació:
 

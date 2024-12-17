@@ -1,0 +1,162 @@
+---
+title: "Problema 6"
+subtitle: "Anàlisi de Dades 2024-25"
+date: 12/18/2024
+format:
+  revealjs:
+    embed-resources: true
+    smaller: true
+    theme: default
+    footer: "Miquel Àngel Aguiló, Joan Camps, Gerard Ribas"
+date-format: "DD/MM/YYYY"
+author: "Miquel Àngel Aguiló, Joan Camps, Gerard Ribas"
+lang: "ca"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(janitor)
+library(viridis)
+library(ggcorrplot)
+```
+
+
+## Enunciat
+- Sèrie temporal trimestral: vendes d'un producte en milers
+- El 80% de les dades són per aprendre, el 20% restant per avaluar la capacitat predictiva
+
+. . .
+
+- Ens demanen:
+  - Descriure la sèrie: gràfic, tendència, variabilitat i estacionalitat
+  - ACF i PACF
+  - Model additiu i multiplicatiu
+  - Fer pronòstics amb el millor
+
+## Introducció
+- Les dades només són un llistat numèric
+  - Dona les vendes en milers
+- No tenim informació de
+  - quan comença la sèrie
+  - el producte i l'empresa en qüestió
+
+  <todo>Completar</todo>
+  
+# Anàlisi exploratòria
+
+## Descripció general de les dades
+- Tenim 48 dades (12 períodes de quatre trimestres)
+- Prenim les 36 primeres per aprendre (75%)
+- Les 12 darreres per avaluar els pronòstics
+  
+## Sèrie temporal
+<gra>Si posam literalment es codi de R funciona</gra>
+```{r}
+# totes les dades
+raw_data <- read.csv("ts.csv",
+                   header=FALSE, sep=" ")
+ts_raw <- ts(raw_data, frequency = 4)
+n <- nrow(raw_data)
+
+# seleccionam el 80% (mòdul 4) de les files
+n_data <- floor(0.8*n)
+n_data <- n_data - (n_data %% 4)
+data <- raw_data[1:n_data,]
+ts <- ts(data, frequency = 4)
+
+# dibuixam les dades en un gràfic
+x=1:11
+plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
+lines(c(1,60), c(10,160), type='l')
+axis(1, at = x, labels = x)
+```
+
+<gra>Jo comentaria damunt això per no perdre es gràfic de vista</gra>
+
+## ACF
+```{r}
+acf(ts)
+```
+
+## PACF
+```{r}
+pacf(ts)
+```
+
+
+
+# Model additiu i multiplicatiu
+
+# Prediccions
+
+
+# Diapositives de prova
+Ses próximes diapos són de **prova**.
+
+## Múltiples columnes
+:::: {.columns}
+
+::: {.column width="40%"}
+Left column
+:::
+
+::: {.column width="60%"}
+Right column
+:::
+
+::::
+## Resultat d'un codi
+```{r}
+ts_raw
+```
+
+## Codi visible
+```{r, echo=T}
+plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
+lines(c(1,60), c(10,160), type='l')
+axis(1, at = x, labels = x)
+```
+
+
+
+
+
+
+
+```{css, echo = FALSE}
+/* Estil de sortida per HTML/CSS */
+/* Per posar notes pròpies */
+todo {color: magenta}
+gra {color: rgb(237, 65, 65)}
+jct {color: #6666ff}
+maa {color: #66bb66}
+note {color: orange}
+comment {display: none}
+gra::before {
+   content: "[G: ";
+   font-weight: bold;
+}
+jct::before {
+   content: "[J: ";
+   font-weight: bold;
+}
+maa::before {
+   content: "[M: ";
+   font-weight: bold;
+}
+note::before {
+   content: "[NOTA: ";
+   font-weight: bold;
+}
+todo::before {
+   content: "[TODO: ";
+   font-weight: bold;
+}
+gra::after, jct::after, note::after, todo::after, maa:after {
+   content: "]";
+}
+```
+
