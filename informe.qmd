@@ -71,7 +71,10 @@ La sèrie temporal [ts_1](https://github.com/igmuib/Practica_AD/blob/main/ts_1.c
 
 ## Introducció
 
-<jct> Desciben el contexto del problema ; Desciben cada una de las vaiables que confoman la base de datos del estudio ; Han explicado adecuadamente la metodología estadística que se utiliza en el estudio </jct>
+Ens disposarem a analitzar la sèrie corresponent a les vendes d'una empresa, dividida en trimestres. El nostre objectiu serà estudiar la seva tendència, estacionalitat i cercar cicles en aquesta. Per això, descomposarem la sèrie, la representarem i estudiarem els gràfics ACF i PACF. 
+
+Un cop fet això, mirarem d'ajustar la sèrie amb els models multiplicatiu i additiu, els compararem per veure quin dels dos s'ajusta millor a la sèrie, farem unes prediccions dels 12 següents trimestres i els compararem amb els valors reals, calculant el seu error quadràtic mitjà.
+
 
 ## Anàlisi exploratòria
 
@@ -337,4 +340,5 @@ Pot parèixer sorprenent el fet que l'error sigui major al del model additiu, ja
 Tot i això, notem que això ho hem pogut fer ja que disposàvem de les dades futures, idò en cas contrari ens haguéssim quedat només amb el multiplicatiu o haguéssim hagut d'esperar un parell d'anys per arribar en aquesta conclusió.
 
 ## Conclusions
+Un cop hem finalitzat l'anàlisi de la sèrie temporal i hem fet les previsions, hem pogut concloure que la sèrie es modela prou bé amb els models additiu i multiplicatiu. Hem fet unes previsions dels següents 12 trimestres, gràcies a unes aproximacions de la tendència amb una recta de regressió lineal, on a partir d'aquí també hem aproximat l'estacionalitat. Hem observat i comparat els errors, i hem pogut concloure que el model multiplicatiu és lleugerament millor per estimar la sèrie, tot i que sorprenent el model additiu ha predit millor les dades futures.
 
