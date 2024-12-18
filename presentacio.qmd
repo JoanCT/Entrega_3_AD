@@ -25,11 +25,11 @@ library(ggcorrplot)
 
 ## Continguts
 - Enunciat
-- Introducció <todo></todo>
+- Introducció
 - Anàlisi exploratòria
 - Models additiu i multiplicatiu <todo>Mirau ses notes que he posat</todo>
 - Prediccions <todo></todo>
-- Conclusions <todo></todo>
+- Conclusions
 
 ## Enunciat
 - Sèrie temporal trimestral
@@ -46,12 +46,17 @@ library(ggcorrplot)
 
 ## Introducció
 - Les dades només són un llistat numèric
-  - Dona les vendes en milers
 - No tenim informació de
   - quan comença la sèrie
   - el producte i l'empresa en qüestió
+  
+  
+- Tècniques utilitzades:
+  - ACF i PACF
+  - Regressió simple
+  - Transformació de la sèrie a una estacionaria
+  - Error Quadràtic Mitjà
 
-  <todo>Completar</todo>
   
 # Anàlisi exploratòria
 
@@ -246,37 +251,13 @@ legend("topleft", legend = c("original", "model multiplicatiu"), col = c("black"
 ```
 
 
-# Diapositives de prova
-Ses próximes diapos són de **prova**.
+# Conclusions
+- Bon ajusts dels dos models a les dades
+  - El multiplicatiu s'ajusta millor
+- L'error de les prediccions és major que el de les dades, però s'hi ajusta a la forma
+- Sorprenentment, l'additiu prediu millor
 
-## Múltiples columnes
-:::: {.columns}
-
-::: {.column width="40%"}
-Left column
-:::
-
-::: {.column width="60%"}
-Right column
-:::
-
-::::
-## Resultat d'un codi
-```{r}
-ts_raw
-```
-
-## Codi visible
-```{r, echo=T}
-plot.ts(ts, xlab = "Temps", ylab = "Ventes en milers", xaxt="n")
-lines(c(1,60), c(10,160), type='l')
-axis(1, at = x, labels = x)
-```
-
-
-
-
-
+Concloem que, en el context del problema, hem pogut predir de manera més o menys satisfactòria el nombre de vendes del producte futures.
 
 
 ```{css, echo = FALSE}
