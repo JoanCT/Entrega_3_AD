@@ -27,8 +27,8 @@ library(ggcorrplot)
 - Enunciat
 - Introducció
 - Anàlisi exploratòria
-- Models additiu i multiplicatiu <todo>Mirau ses notes que he posat</todo>
-- Prediccions <todo></todo>
+- Models additiu i multiplicatiu 
+- Prediccions 
 - Conclusions
 
 ## Enunciat
@@ -132,23 +132,17 @@ pacf(ts)
 
 # Model additiu i multiplicatiu
 
-## Model additiu
-- $y_t = \mu_t + S_t + a_t$
+## decompose()
 ```{r}
 add = decompose(ts, type = "additive")
 plot(add)
 ```
 
-## Model multiplicatiu
-- $y_t = \mu_t \cdot S_t \cdot a_t$
-```{r}
-mult = decompose(ts, type = "multiplicative")
-plot(mult)
-```
-
 ## Comparativa (I)
-<gra>Això ja és des model simplificat. Ho posam abans d'aquesta diapo o ho deim allà?</gra>
-<gra>També hauríem de mostrar lo que mos dona es model per veure a ull que sa variança des residus es sa mateixa. Jo proòs no posar es `decompose()` d'abans pq total no els feim servir i dibuixar es simplificats, dient a sa presentació que no mos serveixen pq no podem fer prediccions</gra>
+
+- Model additiu: $y_t = \mu_t + S_t + a_t$
+
+- Model multiplicatiu: $y_t = \mu_t \cdot S_t \cdot a_t$
 ```{r}
 # Restam la recta a la sèrie
 e_add=data-tendencia$fitted.values
@@ -178,6 +172,7 @@ res_mult=e_ts_mult/s_compl_mult
 ```
 
 ```{r}
+
 model_add = tendencia$fitted.values + s_compl_add
 model_mult = tendencia$fitted.values* s_compl_mult
 
@@ -216,6 +211,31 @@ shapiro.test(res_mult)$p.value
 
 # Prediccions
 
+## Model additiu
+```{r}
+n=36
+data_2=raw_data[1:48,]
+time_extended <- seq(from = 1, by = 0.25, length.out = 48)
+ts_2 <- ts(data_2, frequency = 4)
+model=lm(data_2~time(ts_raw)) 
+new_data <- data.frame( time.ts=time_extended)
+tend <- predict(model,newdata = new_data)
+estacionalitat=rep(s_add,12)
+ts_pred=ts(tend+estacionalitat,frequency=4)
+x=1:13
+plot(ts_pred, type = "l", col = "red", lwd = 1, xlab = "Temps", ylab = "Ventes en milers",ylim = c(40,170), xaxt="n")
+axis(1, at = x, labels = x)
+lines(ts_2, col = "black", lwd = 1)
+legend("topleft", legend = c("original", "model additiu"), col = c("black", "red"), lty = 1)
+lines(rep(10, 180-30+1), 30:180, lty = "dashed")
+```
+
+```{r}
+print(paste("EQM previsió:       ", mean((ts_2[37:48] - ts_pred[37:48])^2)))
+
+
+```
+
 ## Model multiplicatiu
 
 ```{r}
@@ -248,6 +268,10 @@ lines(rep(10, 180-30+1), 30:180, lty = "dashed")
 
 legend("topleft", legend = c("original", "model multiplicatiu"), col = c("black", "blue"), lty = 1)
 
+```
+
+```{r}
+print(paste("EQM previsió:       ", mean((ts_completa[37:48] - ts_mult_c[37:48])^2)))
 ```
 
 

@@ -59,7 +59,6 @@ library(ggcorrplot)
 
 Enllaç [git](https://github.com/JoanCT/Practica7_AD).
 
-
 ## Enunciat
 
 La sèrie temporal [ts_1](https://github.com/igmuib/Practica_AD/blob/main/ts_1.csv) correspon a les vendes (en milers d'unitats) d'un producte en una empresa durant diversos trimestres consecutius. L'empresa cerca desenvolupar un model de pronòstic per predir les vendes futures del producte. Per això, dividiu la sèrie temporal en dos trossos: un 80% de les primeres observacions les utilitzareu per “aprendre” i deixareu el 20% restant per avaluar la capacitat predictiva del model.
@@ -72,10 +71,9 @@ La sèrie temporal [ts_1](https://github.com/igmuib/Practica_AD/blob/main/ts_1.c
 
 Les dades s'han descarregat de l'enllaç de l'enunciat al fitxer `ts.csv` i només presenta un llistat numèric del nombre de vendes en milers d'unitats, que conformen la sèrie temporal, dividida en trimestres.
 
-Primerament, farem una anàlisi exploratòria de la sèrie, estudiant la seva tendència, estacionalitat i cercar cicles en aquesta. Per això, descomposarem la sèrie, la representarem i estudiarem els gràfics ACF i PACF. 
+Primerament, farem una anàlisi exploratòria de la sèrie, estudiant la seva tendència, estacionalitat i cercar cicles en aquesta. Per això, representam la sèrie i estudiarem els gràfics ACF i PACF.
 
 Un cop fet això, mirarem d'ajustar la sèrie amb els models multiplicatiu i additiu, els compararem per veure quin dels dos s'ajusta millor a la sèrie, farem unes prediccions dels 12 següents trimestres i els compararem amb els valors reals, calculant el seu error quadràtic mitjà.
-
 
 ## Anàlisi exploratòria
 
@@ -103,7 +101,7 @@ lines(c(1,60), c(10,160), type='l')
 axis(1, at = x, labels = x)
 ```
 
- A simple vista es pot apreciar un comportament oscil·lant i amb presència d'estacionalitat, ja que les oscil·lacions presenten un patró determinat corresponent a les estacions. Ara bé, no podem saber si hi ha més vendes a l'hivern i estiu o a la primavera i tardor, idò no tenim informació sobre el començament de la sèrie. En el cas que la sèrie començàs pel primer (o tercer) trimestre de l'any, podria tractar-se d'una tenda de roba genèrica, i les vendes es concentraríen en els trimestres 1 i 3 de l'any, per mor de les rebaixes del gener i del juliol. Altrament, si la sèrie començàs al segon (o quart) semestre de l'any, es podria tractar de venda de roba d'entretemps, ja que es vendria més a la tardor i primavera.
+A simple vista es pot apreciar un comportament oscil·lant i amb presència d'estacionalitat, ja que les oscil·lacions presenten un patró determinat corresponent a les estacions. Ara bé, no podem saber si hi ha més vendes a l'hivern i estiu o a la primavera i tardor, idò no tenim informació sobre el començament de la sèrie. En el cas que la sèrie començàs pel primer (o tercer) trimestre de l'any, podria tractar-se d'una tenda de roba genèrica, i les vendes es concentraríen en els trimestres 1 i 3 de l'any, per mor de les rebaixes del gener i del juliol. Altrament, si la sèrie començàs al segon (o quart) semestre de l'any, es podria tractar de venda de roba d'entretemps, ja que es vendria més a la tardor i primavera.
 
 ```{r}
 tendencia=lm(data ~ time(ts))
@@ -152,7 +150,6 @@ pairwise.t.test(df_aux$data, df_aux$mes2, paired=TRUE)
 
 Amb un test d'ANOVA i de comparació de mitjanes veim que hi ha diferències significatives entre les mitjanes del 3r al 4t i 2n semestre, i p-valors propers a 0.1 entre el 1r al 2n i 4t semestre. Així, podem corroborar que es dona l'estacionalitat esmentada.
 
-
 ### ACF i PACF
 
 Vegem els gràfics ACF i PACF.
@@ -184,17 +181,18 @@ plot(mult)
 
 De la mateixa manera es veu una tendència creixent, estacionalitat i, comparant-ho amb l'additiu, no s'aprecien moltes diferències.
 
-Ara bé, aquests models no podrem emprar-los per predir valors futurs, perquè la tendència calculada en ambdós models no la podem estendre en el futur, i per tant no podem fer prediccions a partir de la descomposició així calculada. Per això, simplificarem els models calculant manualment la tendència i l'estacionalitat amb l'objectiu de donar-los una expressió que ens permeti fer els pronòstics.
-
+Ara bé, aquests models no podrem emprar-los per predir valors futurs, perquè la tendència calculada en ambdós models no la podem estendre en el futur (ja que es calcula fent servir una mitjana mòbil), i per tant no podem fer prediccions a partir de la descomposició així calculada. Per això, simplificarem els models calculant manualment la tendència i l'estacionalitat amb l'objectiu de donar-los una expressió que ens permeti fer els pronòstics.
 
 ### Simplificació dels models
 
 Per a poder fer prediccions futures, prendrem com a tendència de la sèrie la recta de regressió. A partir d'aquesta, i restant-la (model additiu) o dividint-la (model multiplicatiu), obtenim una sèrie (diguem-li `ts2`) fora tendència de la qual podem extreure'n els components estacionals.
 
 Comprovem primer que la recta de regressió (com a aproximació de la tendència) és prou bona:
+
 ```{r}
 summary(tendencia)
 ```
+
 Com que els coeficients són significatius i l'R quadrat ajustat és de quasi 0.6, ens donam per satisfets amb l'aproximació. De fet, notem que el pendent és positiu (i és significatiu) i, per tant, la sèrie té tendència creixent, com ja sabíem.
 
 Per extreure els components estacionals, restam (cas additiu) o dividim (cas multiplicatiu) la mitjana de la sèrie `ts2` a la mitjana de cada mateix trimestre de l'any. Finalment, restam (cas additiu) o dividim (cas multiplicatiu) aquests coeficients a `ts2` per obtenir els residus dels models.
@@ -230,17 +228,22 @@ plot.ts(res_add,xlab="Temps",ylab="Residus", main = "Model additiu")
 plot.ts(res_mult,xlab="Temps",ylab="Residus",  main = "Model multiplicatiu")
 
 ```
+
 Per veure si són bons models, anem a veure si els errors segueixen una distribució normal amb distribució constant i mitjanes 0 (cas additiu) o 1 (cas multiplicatiu)
+
 ```{r}
 par(mfrow=c(1,2))
 plot(density(na.omit(res_add)), main = "Densitat residus Add", xlab = "residus Add", ylab = "Densitat")
 plot(density(na.omit(res_mult)), main = "Densitat residus Mult", xlab = "residus Mult", ylab = "Densitat")
 ```
+
 Farem un Shapiro test per veure si segueix notmalitat:
+
 ```{r}
 shapiro.test(res_add)
 shapiro.test(res_mult)
 ```
+
 Veim que en ambdós models obtenim residus que segueixen una distribució normal, en l'additiu amb mitjana 0 i en el multiplicatiu amb mitjana 1. A més, en el gràfic de la sèrie temporal dels residus es pot veure que la variància es manté més o manco constant.
 
 Visualitzem els dos models sobre la sèrie original:
@@ -269,11 +272,14 @@ print(paste("Model additiu:       ", mean(na.omit((model_add - data))^2)))
 print(paste("Model multiplicatiu: ", mean(na.omit((model_mult - data))^2)))
 
 ```
+
 En vista que el model multiplicatiu presenta un MSE menor, i té un p-valor major en el test de normalitat dels residus, seleccionarem aquest per fer les prediccions futures. Tot i això, ja que disposam de les dades futures, aplicarem els dos models per comparar quin és millor amb les previsions, tot i que a la pràctica ens quedaríem amb el multiplicatiu ja que s'ajusta millor a les dades existents.
 
-
 ## Pronòstic
-Anem a intentar preveure, a partir del model additiu, la sèrie temporal pels 12 termes restants. Per això, el que farem serà sumar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regressió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem serà repetir els 4 últims valors d'estacionalitat calculats anteriorment, i els repetirem 3 vegades. El renou blanc serà l'error, és a dir, la diferència entre els valors reals i els estimats. Anem a calcular l'estimació:
+
+Anem a intentar preveure, a partir dels models considerats, la sèrie temporal pels 12 termes restants. Per això, el que farem serà tenir en compte la tendència i l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regressió lineal (vista a l'inici del projecte). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem serà repetir 3 vegades els 4 últims valors d'estacionalitat calculats anteriorment. El terme de renou no el tenim en compte per a la predicció, i per tant formarà part de l'error del model.
+
+Anem a calcular primer l'estimació amb el model additiu. En aquest cas, sumam tendència amb estacionalitat:
 
 ```{r}
 n=36
@@ -285,17 +291,23 @@ new_data <- data.frame( time.ts=time_extended)
 tend <- predict(model,newdata = new_data)
 estacionalitat=rep(s_add,12)
 ts_pred=ts(tend+estacionalitat,frequency=4)
-plot(ts_pred, type = "l", col = "blue", lwd = 1, xlab = "Temps", ylab = "Ventes en milers", main = "Comparació de la Sèrie original amb la previsió")
+x=1:13
+plot(ts_pred, type = "l", col = "red", lwd = 1, xlab = "Temps", ylab = "Ventes en milers", main = "Comparació de la sèrie original amb la previsió", xaxt="n", ylim = c(40,170))
+axis(1, at = x, labels = x)
 lines(ts_2, col = "black", lwd = 1)
+legend("topleft", legend = c("original", "model additiu"), col = c("black", "red"), lty = 1)
 lines(rep(10, 180-30+1), 30:180, lty = "dashed")
 ```
+
 A simple vista la previsió més o manco s'ajusta però no en el mateix nivell que quan només miràvem les dades d'aprenentatge. Comprovem-ho calculant l'error quadràtic mitjà (MSE):
+
 ```{r}
 mean((ts_2[37:48] - ts_pred[37:48])^2)
 ```
+
 Com podem veure, presenta un error major al de les dades ($143.66 > 76.9$).
 
-De manera anàloga, a partir del model multiplicatiu, predirem els valors de la sèrie temporal pels 12 trimestres següents. Per això, el que farem serà multiplicar la tendència amb l'estacionalitat. Recordem que la tendència l'aproximam amb una recta de regressió lineal (vista a l'inici de l'exercici). L'estacionalitat és periòdica, cada any és la mateixa, llavors el que farem serà repetir 3 vegades els 4 últims valors d'estacionalitat calculats anteriorment. El terme de renou no el tenim en compte per a la predicció, i per tant formarà part de l'error del model. Anem a calcular l'estimació, de manera similiar al model additiu:
+De manera anàloga, calculem la predicció amb el model multiplicatiu. En aquest cas, multiplicam tendència i estacionalitat.
 
 ```{r}
 # Extreim els elements que necessitam per a la predicció
@@ -318,8 +330,7 @@ for (i in 1:length(prediccions_mult)){
 mult_completa = c(as.vector(model_mult), prediccions_mult)
 ts_mult_c = ts(mult_completa, frequency= 4)
 ts_completa = ts(raw_data, frequency = 4)
-x=1:13
-plot.ts(ts_completa, xlab = "Temps", ylab = "Vendes en milers", xaxt="n")
+plot.ts(ts_completa, xlab = "Temps", ylab = "Vendes en milers", xaxt="n", main = "Comparació de la sèrie original amb la previsió")
 axis(1, at = x, labels = x)
 
 lines(rep(10, 180-40+1), 40:180, lty = "dashed")
@@ -332,6 +343,7 @@ legend("topleft", legend = c("original", "model multiplicatiu"), col = c("black"
 Veim que la previsió segueix el patró de la sèrie, però s'equivoca en les magnituds dels pics, i no se veu a simple vista una millora respecte l'additiu, sobretot per dos pics que queden bastant allunyats.
 
 De nou, calculem l'error quadràtic mitjà de l'aproximació:
+
 ```{r}
 mean((ts_completa[37:48] - ts_mult_c[37:48])^2)
 ```
