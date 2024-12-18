@@ -3275,7 +3275,6 @@ content: "]";
 </style>
 </div>
 <p>Enllaç <a href="https://github.com/JoanCT/Practica7_AD">git</a>.</p>
-<p><todo>Queda per fer: introducció, conclusions, README</todo></p>
 <section id="enunciat" class="level2">
 <h2 class="anchored" data-anchor-id="enunciat">Enunciat</h2>
 <p>La sèrie temporal <a href="https://github.com/igmuib/Practica_AD/blob/main/ts_1.csv">ts_1</a> correspon a les vendes (en milers d’unitats) d’un producte en una empresa durant diversos trimestres consecutius. L’empresa cerca desenvolupar un model de pronòstic per predir les vendes futures del producte. Per això, dividiu la sèrie temporal en dos trossos: un 80% de les primeres observacions les utilitzareu per “aprendre” i deixareu el 20% restant per avaluar la capacitat predictiva del model.</p>
@@ -3284,7 +3283,8 @@ content: "]";
 </section>
 <section id="introducció" class="level2">
 <h2 class="anchored" data-anchor-id="introducció">Introducció</h2>
-<p>Ens disposarem a analitzar la sèrie corresponent a les vendes d’una empresa, dividida en trimestres. El nostre objectiu serà estudiar la seva tendència, estacionalitat i cercar cicles en aquesta. Per això, descomposarem la sèrie, la representarem i estudiarem els gràfics ACF i PACF.</p>
+<p>Les dades s’han descarregat de l’enllaç de l’enunciat al fitxer <code>ts.csv</code> i només presenta un llistat numèric del nombre de vendes en milers d’unitats, que conformen la sèrie temporal, dividida en trimestres.</p>
+<p>Primerament, farem una anàlisi exploratòria de la sèrie, estudiant la seva tendència, estacionalitat i cercar cicles en aquesta. Per això, descomposarem la sèrie, la representarem i estudiarem els gràfics ACF i PACF.</p>
 <p>Un cop fet això, mirarem d’ajustar la sèrie amb els models multiplicatiu i additiu, els compararem per veure quin dels dos s’ajusta millor a la sèrie, farem unes prediccions dels 12 següents trimestres i els compararem amb els valors reals, calculant el seu error quadràtic mitjà.</p>
 </section>
 <section id="anàlisi-exploratòria" class="level2">
@@ -3535,6 +3535,7 @@ W = 0.98113, p-value = 0.7828</code></pre>
 <section id="conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
 <p>Un cop hem finalitzat l’anàlisi de la sèrie temporal i hem fet les previsions, hem pogut concloure que la sèrie es modela prou bé amb els models additiu i multiplicatiu. Hem fet unes previsions dels següents 12 trimestres, gràcies a unes aproximacions de la tendència amb una recta de regressió lineal, on a partir d’aquí també hem aproximat l’estacionalitat. Hem observat i comparat els errors, i hem pogut concloure que el model multiplicatiu és lleugerament millor per estimar la sèrie, tot i que sorprenent el model additiu ha predit millor les dades futures.</p>
+<p>En el context del problema concloem que, tot i que els models no s’ajusten perfectament a les dades, són prou bons i sí que capturen la forma de la sèrie, fins i tot en les prediccions encara que l’error sigui major.</p>
 </section>
 
 </main>

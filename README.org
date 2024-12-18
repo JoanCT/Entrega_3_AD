@@ -1,0 +1,11 @@
+#+title:  Problema 6 de la pràctica 7
+
+** Autors
+- Miquel Àngel Aguiló
+- Joan Camps Tomàs
+- Gerard Ribas Acebes
+
+** Resum
+Ens donen una sèrie temporal (fitxer =ts.csv=) on s'indiquen el nombre de vendes d'un determinat producte d'una empresa, en milers d'unitats.
+
+Se'ns demana dividir la sèrie en un 80% d'aprenentatge (amb els models additiu i multiplicatiu) i un 20% per comprovar com s'ajusten els models a les dades futures.
